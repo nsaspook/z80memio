@@ -3,9 +3,9 @@
 //#define DLED_DEBUG	// comment out to send real PORT data
 
 
-/* Parts of this code were modified from
- *  http://www.d.umn.edu/~cprince/PubRes/Hardware/SPI/
- * examples
+/* 
+ *  
+ * 
  *
  * memory/io emulator for Z80
  *
@@ -169,7 +169,7 @@ struct z80_type { // internal state table
 
 #pragma udata gpr6
 uint8_t z80_ram[256];
-const rom int8_t z80_rom[1024] = {0};
+const rom int8_t z80_rom[1024] = {0xc7};
 
 #pragma udata 
 void work_handler(void);
@@ -220,27 +220,33 @@ void InterruptHandlerHigh(void)
 	 * MREQ
 	 */
 	if (INTCONbits.INT0IF) {
-		WAIT = LOW;
 		INTCONbits.INT0IF = LOW;
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
-		if (ZRD) TRISD = 0x00; // output from memory or io to Z80
+		Z.maddr = PORTA;
+		//		Z.maddr += ((uint16_t) PORTE << 8);
+		Z.ISRAM = A10;
+		Z.WR = ZRD;
+		if (ZM1) {
+			Z.paddr = Z.maddr;
+		}
+		if (!Z.WR) TRISD = 0x00; // output from memory or io to Z80
 	}
 	/*
 	 * IORQ
 	 */
 	if (INTCON3bits.INT1IF) {
-		WAIT = LOW;
 		INTCON3bits.INT1IF = LOW;
 		Z.IORQ = HIGH;
 		Z.RUN = TRUE;
-		if (ZRD) TRISD = 0x00; // output from memory or io to Z80
+		Z.maddr = PORTA;
+		Z.WR = ZRD;
+		if (!Z.WR) TRISD = 0x00; // output from memory or io to Z80
 	}
 	/*
 	 * WR
 	 */
 	if (INTCON3bits.INT2IF) {
-		WAIT = LOW;
 		INTCON3bits.INT2IF = LOW;
 		TRISD = 0xff; // input to memory or io from Z80
 		Z.WR = HIGH;
@@ -250,28 +256,36 @@ void InterruptHandlerHigh(void)
 	if (Z.RUN) {
 		DLED2 = HIGH;
 		Z.RUN = FALSE;
-		Z.maddr = PORTA;
-		Z.maddr += ((uint16_t) PORTE << 8);
-		Z.ISRAM = A10;
-		if (ZM1) {
-			Z.paddr = Z.maddr;
-		}
-
 		if (Z.ISRAM) {
 			if (Z.MREQ) {
 				if (Z.WR) {
-					z80_ram[Z.maddr & 0xff] = LATD;
+					z80_ram[Z.maddr & 0xff] = ZDATA;
 				} else {
-					LATD = z80_ram[Z.maddr & 0xff];
+					ZDATA = z80_ram[Z.maddr & 0xff];
 				}
+				//				SSP1BUF=ZDATA;
 			}
 		} else {
 			if (Z.MREQ) {
-				LATD = z80_rom[Z.maddr];
+				//				ZDATA = z80_rom[Z.paddr];
+				ZDATA = z80_rom[0];
+				SSP1BUF = ZDATA;
 			}
 		}
 		WAIT = HIGH;
+		Nop();
+		Nop();
+		Nop();
+		Nop();
+		Nop();
+		Nop();
+		Nop();
+		Nop();
+		Z.MREQ = LOW;
+		Z.IORQ = LOW;
+		Z.WR = LOW;
 		DLED2 = LOW;
+		WAIT = LOW;
 	}
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 1 second timer int handler
@@ -355,8 +369,9 @@ void config_pic_io(void)
 	TRISCbits.TRISC5 = OUT; // SDO
 
 	/* setup the SPI interface for Master */
-	OpenSPI(SPI_FOSC_64, MODE_00, SMPEND); // 1MHz
-	SSPCON1 |= SPI_FOSC_64; // set clock to low speed
+	OpenSPI1(SPI_FOSC_4, MODE_00, SMPEND);
+	SSPCON1 |= SPI_FOSC_4; // set clock to high speed
+	PIE1bits.SSP1IE = HIGH; // enable interrupts
 
 	/* System activity timer */
 	OpenTimer0(TIMER_INT_ON & T0_16BIT & T0_SOURCE_INT & T0_PS_1_256);
