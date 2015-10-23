@@ -159,7 +159,7 @@ struct z80_type { // internal state table
 	uint8_t IORQ : 1;
 	uint8_t RD : 1;
 	uint8_t WR : 1;
-	uint8_t ISROM : 1;
+	uint8_t ISRAM : 1;
 	uint8_t S1 : 1;
 	uint8_t S2 : 1;
 	uint16_t paddr;
@@ -248,19 +248,16 @@ void InterruptHandlerHigh(void)
 	}
 
 	if (Z.RUN) {
+		DLED2 = HIGH;
 		Z.RUN = FALSE;
 		Z.maddr = PORTA;
 		Z.maddr += ((uint16_t) PORTE << 8);
-		Z.ISROM = A10;
+		Z.ISRAM = A10;
 		if (ZM1) {
 			Z.paddr = Z.maddr;
 		}
 
-		if (Z.ISROM) {
-			if (Z.MREQ) {
-				LATD = z80_rom[Z.maddr];
-			}
-		} else {
+		if (Z.ISRAM) {
 			if (Z.MREQ) {
 				if (Z.WR) {
 					z80_ram[Z.maddr & 0xff] = LATD;
@@ -268,8 +265,13 @@ void InterruptHandlerHigh(void)
 					LATD = z80_ram[Z.maddr & 0xff];
 				}
 			}
+		} else {
+			if (Z.MREQ) {
+				LATD = z80_rom[Z.maddr];
+			}
 		}
 		WAIT = HIGH;
+		DLED2 = LOW;
 	}
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 1 second timer int handler
