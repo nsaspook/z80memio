@@ -33,7 +33,7 @@
 #pragma config BORV = 190       // Brown Out Reset Voltage bits (VBOR set to 1.90 V nominal)
 
 // CONFIG2H
-#pragma config WDTEN = ON       // Watchdog Timer Enable bits (WDT is always enabled. SWDTEN bit has no effect)
+#pragma config WDTEN = OFF       // Watchdog Timer Enable bits (WDT is always enabled. SWDTEN bit has no effect)
 #pragma config WDTPS = 32768    // Watchdog Timer Postscale Select bits (1:32768)
 
 // CONFIG3H
@@ -223,14 +223,20 @@ void InterruptHandlerHigh(void)
 		INTCONbits.INT0IF = LOW;
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
+		//		Z.maddr = 0;
 		Z.maddr = PORTA;
 		//		Z.maddr += ((uint16_t) PORTE << 8);
-		Z.ISRAM = A10;
+		//		Z.ISRAM = A10;
+		Z.ISRAM = FALSE;
 		Z.WR = ZRD;
 		if (ZM1) {
 			Z.paddr = Z.maddr;
 		}
-		if (!Z.WR) TRISD = 0x00; // output from memory or io to Z80
+		if (!Z.WR) {
+			TRISD = 0x00; // output from memory or io to Z80
+		} else {
+			TRISD = 0xff; // output to memory or io from Z80
+		}
 	}
 	/*
 	 * IORQ
@@ -241,16 +247,17 @@ void InterruptHandlerHigh(void)
 		Z.RUN = TRUE;
 		Z.maddr = PORTA;
 		Z.WR = ZRD;
-		if (!Z.WR) TRISD = 0x00; // output from memory or io to Z80
+		if (!Z.WR) {
+			TRISD = 0x00; // output from memory or io to Z80
+		} else {
+			TRISD = 0xff; // output to memory or io from Z80
+		}
 	}
 	/*
 	 * WR
 	 */
 	if (INTCON3bits.INT2IF) {
 		INTCON3bits.INT2IF = LOW;
-		TRISD = 0xff; // input to memory or io from Z80
-		Z.WR = HIGH;
-		Z.RUN = TRUE;
 	}
 
 	if (Z.RUN) {
@@ -263,13 +270,18 @@ void InterruptHandlerHigh(void)
 				} else {
 					ZDATA = z80_ram[Z.maddr & 0xff];
 				}
-				//				SSP1BUF=ZDATA;
+				DLED7 = !DLED7;
 			}
 		} else {
 			if (Z.MREQ) {
-				//				ZDATA = z80_rom[Z.paddr];
+				//ZDATA = z80_rom[Z.maddr];
 				ZDATA = z80_rom[0];
+				SSP1BUF = Z.maddr;
+				while (!SSP1STATbits.BF);
+				b_dummy = SSP1BUF;
 				SSP1BUF = ZDATA;
+				while (!SSP1STATbits.BF);
+				b_dummy = SSP1BUF;
 			}
 		}
 		WAIT = HIGH;
@@ -360,7 +372,7 @@ void config_pic_io(void)
 	//	PADCFG1bits.RDPU = HIGH;
 	TRISE = 0xff;
 	//	PADCFG1bits.REPU = HIGH;
-	LATA = 0xff;
+
 	LATC = 0xff;
 
 	/* SPI pins setup */
@@ -425,8 +437,6 @@ void check_config(void)
 void main(void) /* SPI Master/Slave loopback */
 {
 	check_config();
-
-	wdtdelay(500, TRUE); // short delay after boot
 
 	while (1) { // just loop
 		wdtdelay(600000, TRUE);
