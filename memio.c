@@ -12,13 +12,13 @@
  * nsaspook@nsaspook.com    2015
  */
 
-#define P45K22
+#define P46K22
 
-// PIC18F44K22 Configuration Bit Settings
+// PIC18F46K22 Configuration Bit Settings
 
 // 'C' source line config statements
 
-#include <p18f44k22.h>
+#include <p18f46k22.h>
 
 // CONFIG1H
 #pragma config FOSC = INTIO7    // Oscillator Selection bits (Internal oscillator block, CLKOUT function on OSC2)
@@ -116,12 +116,13 @@
 #define OUT		LOW
 
 #define	A10		LATCbits.LATC0 // RAM/ROM select LOW for ROM starting at address 0
+#define WAIT		LATCbits.LATC1  // memory access delay
 #define	ZDATA		LATD
 #define ZRD		LATBbits.LATB4
 #define ZM1		LATBbits.LATB5
 
 #ifdef DLED_DEBUG
-#ifdef P45K22
+#ifdef P46K22
 #define DLED0		LATDbits.LATD0
 #define DLED1		LATDbits.LATD1
 #define DLED2		LATDbits.LATD2
@@ -132,7 +133,8 @@
 #define DLED7		LATAbits.LATA7
 #endif
 #else
-#define DLED1		LATCbits.LATC1
+#define DLED2		LATCbits.LATC2
+#define DLED7		LATCbits.LATC7
 #endif
 
 #ifdef INTTYPES
@@ -219,6 +221,7 @@ void InterruptHandlerHigh(void)
 	 * MREQ
 	 */
 	if (INTCONbits.INT0IF) {
+		WAIT = LOW;
 		INTCONbits.INT0IF = LOW;
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
@@ -228,6 +231,7 @@ void InterruptHandlerHigh(void)
 	 * IORQ
 	 */
 	if (INTCON3bits.INT1IF) {
+		WAIT = LOW;
 		INTCON3bits.INT1IF = LOW;
 		Z.IORQ = HIGH;
 		Z.RUN = TRUE;
@@ -237,6 +241,7 @@ void InterruptHandlerHigh(void)
 	 * WR
 	 */
 	if (INTCON3bits.INT2IF) {
+		WAIT = LOW;
 		INTCON3bits.INT2IF = LOW;
 		TRISD = 0xff; // input to memory or io from Z80
 		Z.WR = HIGH;
@@ -265,6 +270,7 @@ void InterruptHandlerHigh(void)
 				}
 			}
 		}
+		WAIT = HIGH;
 	}
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 1 second timer int handler
@@ -273,6 +279,7 @@ void InterruptHandlerHigh(void)
 		timer.lt = TIMEROFFSET; // Copy timer value into union
 		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
 		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
+		DLED7 = !DLED7;
 	}
 
 	if (PIR1bits.ADIF) { // ADC conversion complete flag
@@ -296,7 +303,7 @@ void InterruptHandlerHigh(void)
 void work_handler(void)
 {
 	if (PIR1bits.TMR1IF) {
-		DLED1 = !DLED1;
+		DLED2 = !DLED2;
 	}
 }
 #pragma	tmpdata
@@ -334,7 +341,7 @@ void config_pic_io(void)
 	ANSELA = 0;
 	TRISA = 0xff; // all inputs
 	TRISB = 0xff; // all inputs
-	TRISC = 0x00;
+	TRISC = 0b00000001;
 	TRISD = 0x00; // all outputs
 	//	PADCFG1bits.RDPU = HIGH;
 	TRISE = 0xff;
@@ -343,7 +350,6 @@ void config_pic_io(void)
 	LATC = 0xff;
 
 	/* SPI pins setup */
-	TRISAbits.TRISA5 = OUT; // CS
 	TRISCbits.TRISC3 = OUT; // SCK 
 	TRISCbits.TRISC4 = IN; // SDI
 	TRISCbits.TRISC5 = OUT; // SDO
@@ -406,8 +412,6 @@ void main(void) /* SPI Master/Slave loopback */
 	check_config();
 
 	wdtdelay(500, TRUE); // short delay after boot
-	LATD = 0b00111111; // all LEDS off/outputs high
-	LATA = 0b11000000;
 
 	while (1) { // just loop
 		wdtdelay(600000, TRUE);
