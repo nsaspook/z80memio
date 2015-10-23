@@ -208,7 +208,6 @@ void work_int(void)
 void InterruptHandlerHigh(void)
 {
 	static uint8_t b_dummy;
-	static union Timers timer;
 
 	if (INTCONbits.RBIF) { // PORT B int handler
 		INTCONbits.RBIF = LOW;
@@ -275,10 +274,7 @@ void InterruptHandlerHigh(void)
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 1 second timer int handler
 		INTCONbits.TMR0IF = LOW; //clear interrupt flag
-		//check for TMR0 overflow
-		timer.lt = TIMEROFFSET; // Copy timer value into union
-		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
-		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
+		WriteTimer0(TIMEROFFSET);
 		DLED7 = !DLED7;
 	}
 
@@ -303,6 +299,8 @@ void InterruptHandlerHigh(void)
 void work_handler(void)
 {
 	if (PIR1bits.TMR1IF) {
+		PIR1bits.TMR1IF = LOW; // clear TMR1 interrupt flag
+		WriteTimer1(PDELAY);
 		DLED2 = !DLED2;
 	}
 }
