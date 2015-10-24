@@ -1,15 +1,10 @@
-
-
-//#define DLED_DEBUG	// comment out to send real PORT data
-
-
 /* 
- *  
- * 
+ * 1024 byte ROM and 256 byte RAM
+ * currently limited to 256 bytes for testing
  *
- * memory/io emulator for Z80
+ * memory/io emulator for Z80, slow but works
  *
- * nsaspook@nsaspook.com    2015
+ * nsaspook    2015
  */
 
 #define P46K22
@@ -80,22 +75,24 @@
 #include <GenericTypeDefs.h>
 #include "memio_vector.h"
 
-/* ADC master command format
+/* Z80 SPI debug port
  *
  * hardware pins
- * SPI config
+ * SPI1 config
  * Pin 24 SDO
  * Pin 25 SDI
  * Pin 18 SCK clock
  */
 
 #pragma udata gpr6
+/* Z80 memory variables */
 uint8_t volatile z80_ram[256];
+/* short testing program of opcodes and calls */
 const rom int8_t z80_rom[1024] = {
-	0x00, 0xf3, 0xcf, 0x76, 0x76, 0x76, 0x76, 0x76, 
-	0xd7, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76, 
-	0xdf, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76, 
-	0xc7, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76 
+	0x00, 0xf3, 0xcf, 0x76, 0x76, 0x76, 0x76, 0x76,
+	0xd7, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76,
+	0xdf, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76,
+	0xc7, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76
 };
 
 #pragma udata 
@@ -126,15 +123,9 @@ void work_int(void)
 }
 #pragma code
 
-void wdtdelay(unsigned long delay, unsigned char clearit)
-{
-	static uint32_t dcount;
-	for (dcount = 0; dcount <= delay; dcount++) { // delay a bit
-		Nop();
-		if (clearit) ClrWdt(); // reset the WDT timer
-	};
-}
-
+/*
+ * setup the basic hardware config
+ */
 void config_pic_io(void)
 {
 	int z;
@@ -157,15 +148,14 @@ void config_pic_io(void)
 	ANSELD = 0;
 	ANSELE = 0;
 	ANSELA = 0;
-	TRISA = 0xff; // all inputs
-	TRISB = 0xff; // all inputs
-	TRISC = 0b00000001;
+	TRISA = 0xff; // all inputs for Z80 address
+	TRISB = 0xff; // all inputs Z80 logic inputs
+	TRISC = 0x01; // C0 for A10 Z80 address
 	TRISD = 0xff; // all inputs for the ZDATA default of WR_
-	//	PADCFG1bits.RDPU = HIGH;
-	TRISE = 0xff;
-	//	PADCFG1bits.REPU = HIGH;
+	TRISE = 0xff; // all inputs for Z80 address
 
-	LATC = 0xff;
+	LATC = 0x00;
+	LATD = 0x00;
 
 	/* SPI pins setup */
 	TRISCbits.TRISC3 = OUT; // SCK 
@@ -213,7 +203,7 @@ void config_pic_io(void)
 	RCONbits.IPEN = HIGH;
 	/* Enable priority interrupts */
 	INTCONbits.GIEH = HIGH;
-	INTCONbits.GIEL = LOW;
+	INTCONbits.GIEL = LOW; // not used
 
 	/* clear any SSP error bits */
 	SSPCON1bits.WCOL = SSPCON1bits.SSPOV = LOW;
@@ -230,8 +220,7 @@ void main(void) /* SPI Master/Slave loopback */
 {
 	check_config();
 
-	while (1) { // just loop
-		Nop();
+	while (TRUE) { // just loop
 		Nop();
 	}
 }
