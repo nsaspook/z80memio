@@ -21,7 +21,7 @@
 #include <p18f46k22.h>
 
 // CONFIG1H
-#pragma config FOSC = INTIO7    // Oscillator Selection bits (Internal oscillator block, CLKOUT function on OSC2)
+#pragma config FOSC = INTIO67    // Oscillator Selection bits (Internal oscillator block)
 #pragma config PLLCFG = ON      // 4X PLL Enable (Oscillator multiplied by 4)
 #pragma config PRICLKEN = ON    // Primary clock enable bit (Primary clock is always enabled)
 #pragma config FCMEN = OFF      // Fail-Safe Clock Monitor Enable bit (Fail-Safe Clock Monitor disabled)
@@ -48,7 +48,7 @@
 // CONFIG4L
 #pragma config STVREN = ON      // Stack Full/Underflow Reset Enable bit (Stack full/underflow will cause Reset)
 #pragma config LVP = ON         // Single-Supply ICSP Enable bit (Single-Supply ICSP enabled if MCLRE is also 1)
-#pragma config XINST = OFF      // Extended Instruction Set Enable bit (Instruction set extension and Indexed Addressing mode disabled (Legacy mode))
+#pragma config XINST = ON      // Extended Instruction Set Enable bit (Instruction set extension and Indexed Addressing mode)
 
 // CONFIG5L
 #pragma config CP0 = OFF        // Code Protection Block 0 (Block 0 (000800-001FFFh) not code-protected)
@@ -77,14 +77,8 @@
 
 #include <spi.h>
 #include <timers.h>
-#include <adc.h>
-#include <usart.h>
-#include <delays.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 #include <GenericTypeDefs.h>
+#include "memio_vector.h"
 
 /* ADC master command format
  *
@@ -95,85 +89,12 @@
  * Pin 18 SCK clock
  */
 
-#define	TIMEROFFSET	32000           // timer0 16bit counter value for 1 second to overflow
-#define SLAVE_ACTIVE	5		// Activity counter level
-
-
-/* DIO defines */
-#define LOW		(unsigned char)0        // digital output state levels, sink
-#define	HIGH            (unsigned char)1        // digital output state levels, source
-#define	ON		LOW       		//
-#define OFF		HIGH			//
-#define	S_ON            LOW       		// low select/on for chip/led
-#define S_OFF           HIGH			// high deselect/off chip/led
-#define	R_ON            HIGH       		// control relay states, relay is on when output gate is high, uln2803,omron relays need the CPU at 5.5vdc to drive
-#define R_OFF           LOW			// control relay states
-#define R_ALL_OFF       0x00
-#define R_ALL_ON	0xff
-#define NO		LOW
-#define YES		HIGH
-#define IN		HIGH
-#define OUT		LOW
-
-#define	A10		LATCbits.LATC0 // RAM/ROM select LOW for ROM starting at address 0
-#define WAIT		LATCbits.LATC1  // memory access delay
-#define	ZDATA		LATD
-#define ZRD		LATBbits.LATB4
-#define ZM1		LATBbits.LATB5
-
-#ifdef DLED_DEBUG
-#ifdef P46K22
-#define DLED0		LATDbits.LATD0
-#define DLED1		LATDbits.LATD1
-#define DLED2		LATDbits.LATD2
-#define DLED3		LATDbits.LATD3
-#define DLED4		LATDbits.LATD4
-#define DLED5		LATDbits.LATD5
-#define DLED6		LATAbits.LATA6
-#define DLED7		LATAbits.LATA7
-#endif
-#else
-#define DLED2		LATCbits.LATC2
-#define DLED7		LATCbits.LATC7
-#endif
-
-#ifdef INTTYPES
-#include <stdint.h>
-#else
-#define INTTYPES
-/*unsigned types*/
-typedef unsigned char uint8_t;
-typedef unsigned int uint16_t;
-typedef unsigned long uint32_t;
-typedef unsigned long long uint64_t;
-/*signed types*/
-typedef signed char int8_t;
-typedef signed int int16_t;
-typedef signed long int32_t;
-typedef signed long long int64_t;
-#endif
-
-struct z80_type { // internal state table
-	uint8_t RUN : 1;
-	uint8_t MREQ : 1;
-	uint8_t IORQ : 1;
-	uint8_t RD : 1;
-	uint8_t WR : 1;
-	uint8_t ISRAM : 1;
-	uint8_t S1 : 1;
-	uint8_t S2 : 1;
-	uint16_t paddr;
-	uint16_t maddr;
-	uint8_t data;
-};
-
 #pragma udata gpr6
-uint8_t z80_ram[256];
-const rom int8_t z80_rom[1024] = {0xc7};
+uint8_t volatile z80_ram[256];
+const rom int8_t z80_rom[1024] = {0x00, 0xf3, 0xc7};
 
 #pragma udata 
 void work_handler(void);
-#define	PDELAY		28000	// refresh for I/O
 
 const rom int8_t *build_date = __DATE__, *build_time = __TIME__;
 volatile uint8_t data_in2;
@@ -200,140 +121,6 @@ void work_int(void)
 }
 #pragma code
 
-//----------------------------------------------------------------------------
-// High priority interrupt routine
-#pragma	tmpdata	ISRHtmpdata
-#pragma interrupt InterruptHandlerHigh   nosave=section (".tmpdata")
-
-void InterruptHandlerHigh(void)
-{
-	static uint8_t b_dummy;
-
-	if (INTCONbits.RBIF) { // PORT B int handler
-		INTCONbits.RBIF = LOW;
-		b_dummy = PORTB;
-	}
-
-	/* Z80 Control routines */
-
-	/*
-	 * MREQ
-	 */
-	if (INTCONbits.INT0IF) {
-		INTCONbits.INT0IF = LOW;
-		Z.MREQ = HIGH;
-		Z.RUN = TRUE;
-		//		Z.maddr = 0;
-		Z.maddr = PORTA;
-		//		Z.maddr += ((uint16_t) PORTE << 8);
-		//		Z.ISRAM = A10;
-		Z.ISRAM = FALSE;
-		Z.WR = ZRD;
-		if (ZM1) {
-			Z.paddr = Z.maddr;
-		}
-		if (!Z.WR) {
-			TRISD = 0x00; // output from memory or io to Z80
-		} else {
-			TRISD = 0xff; // output to memory or io from Z80
-		}
-	}
-	/*
-	 * IORQ
-	 */
-	if (INTCON3bits.INT1IF) {
-		INTCON3bits.INT1IF = LOW;
-		Z.IORQ = HIGH;
-		Z.RUN = TRUE;
-		Z.maddr = PORTA;
-		Z.WR = ZRD;
-		if (!Z.WR) {
-			TRISD = 0x00; // output from memory or io to Z80
-		} else {
-			TRISD = 0xff; // output to memory or io from Z80
-		}
-	}
-	/*
-	 * WR
-	 */
-	if (INTCON3bits.INT2IF) {
-		INTCON3bits.INT2IF = LOW;
-	}
-
-	if (Z.RUN) {
-		DLED2 = HIGH;
-		Z.RUN = FALSE;
-		if (Z.ISRAM) {
-			if (Z.MREQ) {
-				if (Z.WR) {
-					z80_ram[Z.maddr & 0xff] = ZDATA;
-				} else {
-					ZDATA = z80_ram[Z.maddr & 0xff];
-				}
-				DLED7 = !DLED7;
-			}
-		} else {
-			if (Z.MREQ) {
-				//ZDATA = z80_rom[Z.maddr];
-				ZDATA = z80_rom[0];
-				SSP1BUF = Z.maddr;
-				while (!SSP1STATbits.BF);
-				b_dummy = SSP1BUF;
-				SSP1BUF = ZDATA;
-				while (!SSP1STATbits.BF);
-				b_dummy = SSP1BUF;
-			}
-		}
-		WAIT = HIGH;
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Z.MREQ = LOW;
-		Z.IORQ = LOW;
-		Z.WR = LOW;
-		DLED2 = LOW;
-		WAIT = LOW;
-	}
-
-	if (INTCONbits.TMR0IF) { // check timer0 irq 1 second timer int handler
-		INTCONbits.TMR0IF = LOW; //clear interrupt flag
-		WriteTimer0(TIMEROFFSET);
-		DLED7 = !DLED7;
-	}
-
-	if (PIR1bits.ADIF) { // ADC conversion complete flag
-		PIR1bits.ADIF = LOW;
-	}
-
-	if (PIR1bits.SSPIF) { // SPI port receiver
-		PIR1bits.SSPIF = LOW;
-		data_in2 = SSPBUF; // read the buffer quickly
-	}
-}
-#pragma	tmpdata
-
-// Low priority interrupt routine
-#pragma	tmpdata	ISRLtmpdata
-#pragma interruptlow work_handler   nosave=section (".tmpdata")
-
-/*
- *  This is the low priority ISR routine, the high ISR routine will be called during this code section
- */
-void work_handler(void)
-{
-	if (PIR1bits.TMR1IF) {
-		PIR1bits.TMR1IF = LOW; // clear TMR1 interrupt flag
-		WriteTimer1(PDELAY);
-		DLED2 = !DLED2;
-	}
-}
-#pragma	tmpdata
-
 void wdtdelay(unsigned long delay, unsigned char clearit)
 {
 	static uint32_t dcount;
@@ -354,7 +141,7 @@ void config_pic_io(void)
 	 */
 
 	OSCCON = 0x70; // internal osc 16mhz, CONFIG OPTION 4XPLL for 64MHZ
-	OSCTUNE = 0b01000000; // 4x pll
+	OSCTUNE = 0b01011111; // 4x pll
 	SLRCON = 0x00; // all slew rates to max
 	/*
 	 * all analog off
@@ -439,6 +226,7 @@ void main(void) /* SPI Master/Slave loopback */
 	check_config();
 
 	while (1) { // just loop
-		wdtdelay(600000, TRUE);
+		Nop();
+		Nop();
 	}
 }
