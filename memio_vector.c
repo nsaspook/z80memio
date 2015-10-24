@@ -1,8 +1,9 @@
 
 #include "memio_vector.h"
 
-//----------------------------------------------------------------------------
-// High priority interrupt routine
+/* High priority interrupt routine
+ * handles the signal and data requests from the Z80
+ */
 #pragma	tmpdata	ISRHtmpdata
 #pragma interrupt InterruptHandlerHigh   nosave=section (".tmpdata")
 
@@ -15,14 +16,14 @@ void InterruptHandlerHigh(void)
 	DLED2 = HIGH;
 
 	/*
-	 * MREQ
+	 * MREQ from Z80
 	 */
 	if (INTCONbits.INT0IF) {
 		INTCONbits.INT0IF = LOW;
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
 		Z.maddr = PORTA;
-		//		Z.maddr += ((uint16_t) PORTE << 8);
+		// Z.maddr += ((uint16_t) (PORTE & 0x03) << 8);
 		Z.ISRAM = A10;
 		Z.WR = ZRD;
 		Z.M1 = !ZM1;
@@ -37,7 +38,7 @@ void InterruptHandlerHigh(void)
 		}
 	}
 	/*
-	 * IORQ
+	 * IORQ from Z80
 	 */
 	if (INTCON3bits.INT1IF) {
 		INTCON3bits.INT1IF = LOW;
@@ -52,7 +53,7 @@ void InterruptHandlerHigh(void)
 		}
 	}
 	/*
-	 * WR
+	 * WR line went low from Z80
 	 */
 	if (INTCON3bits.INT2IF) {
 		INTCON3bits.INT2IF = LOW;
@@ -60,12 +61,15 @@ void InterruptHandlerHigh(void)
 		Z.WR = TRUE;
 	}
 
+	/*
+	 * use the Z80 state structure to talk to the chip
+	 */
 	if (Z.RUN) {
 		Z.RUN = FALSE;
 
-		if (!Z.RFSH) {
+		if (!Z.RFSH) { /* don't process memory refresh cycles */
 			DLED7 = !DLED7;
-			if (Z.ISRAM) {
+			if (Z.ISRAM) { /* RAM access */
 				if (Z.MREQ) {
 					if (Z.WR) {
 						z80_ram[Z.maddr & 0xff] = PORTD;
@@ -73,10 +77,13 @@ void InterruptHandlerHigh(void)
 						ZDATA = z80_ram[Z.maddr & 0xff];
 					}
 				}
-			} else {
+			} else { /* ROM access */
 				if (Z.MREQ) {
 					ZDATA = z80_rom[Z.paddr];
-					if (Z.M1) {
+					if (Z.M1) { /* opcode */
+						/*
+						 * send the address and opcode via SPI for debug
+						 */
 						SSP1BUF = Z.paddr;
 						while (!SSP1STATbits.BF);
 						b_dummy = SSP1BUF;
@@ -93,7 +100,7 @@ void InterruptHandlerHigh(void)
 		 * Too LONG or SHORT will cause misreads of data
 		 * 11 nop opcodes seems to work
 		 */
-		WAIT = HIGH;
+		WAIT = HIGH; /* clear the wait signal so the Z80 can process the data */
 		Nop();
 		Nop();
 		Nop();
@@ -105,20 +112,26 @@ void InterruptHandlerHigh(void)
 		Nop();
 		Nop();
 		Nop();
-		WAIT = LOW;
+		WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
 
+		/*
+		 * reset the state machine
+		 */
 		Z.ISRAM = LOW;
 		Z.MREQ = LOW;
 		Z.IORQ = LOW;
 		Z.WR = LOW;
 		Z.M1 = LOW;
 		Z.RFSH = LOW;
+		/*
+		 * switch the PIC data port to input if needed
+		 */
 		if (ZRD) TRISD = 0xff; // output to memory or io from Z80
 	}
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 1 second timer int handler
 		INTCONbits.TMR0IF = LOW; //clear interrupt flag
-		timer.lt = TIMEROFFSET; // Copy timer value into union
+		timer.lt = TIMEROFFSET; // Copy timer value into union so we don't call a function in the ISR
 		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
 		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
 		DLED7 = !DLED7;
@@ -137,7 +150,8 @@ void InterruptHandlerHigh(void)
 #pragma interruptlow work_handler   nosave=section (".tmpdata")
 
 /*
- *  This is the low priority ISR routine, the high ISR routine will be called during this code section
+ * This is the low priority ISR routine, the high ISR routine will be called during this code section
+ * NOT USED
  */
 void work_handler(void)
 {
