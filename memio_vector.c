@@ -26,7 +26,8 @@ void InterruptHandlerHigh(void)
 		Z.ISRAM = A10;
 		Z.WR = ZRD;
 		Z.M1 = ZM1;
-		if (Z.M1 == LOW) {
+		Z.RFSH = ZRFSH;
+		if (Z.M1 == ON) {
 			Z.paddr = Z.maddr;
 		}
 		if (Z.WR) { //write to pic
@@ -60,25 +61,27 @@ void InterruptHandlerHigh(void)
 
 	if (Z.RUN) {
 		Z.RUN = FALSE;
-		if (Z.ISRAM) {
-			if (Z.MREQ) {
-				if (Z.WR) {
-					z80_ram[Z.maddr & 0xff] = PORTD;
-				} else {
-					ZDATA = z80_ram[Z.maddr & 0xff];
-					DLED7 = !DLED7;
+		DLED7 = !DLED7;
+		if (Z.RFSH == OFF) {
+			if (Z.ISRAM) {
+				if (Z.MREQ) {
+					if (Z.WR) {
+						z80_ram[Z.maddr & 0xff] = PORTD;
+					} else {
+						ZDATA = z80_ram[Z.maddr & 0xff];
+					}
 				}
-			}
-		} else {
-			if (Z.MREQ) {
-				ZDATA = z80_rom[Z.paddr];
-				if (Z.M1 == LOW) {
-					SSP1BUF = Z.paddr;
-					while (!SSP1STATbits.BF);
-					b_dummy = SSP1BUF;
-					SSP1BUF = ZDATA;
-					while (!SSP1STATbits.BF);
-					b_dummy = SSP1BUF;
+			} else {
+				if (Z.MREQ) {
+					ZDATA = z80_rom[Z.paddr];
+					if (Z.M1 == ON) {
+						SSP1BUF = Z.paddr;
+						while (!SSP1STATbits.BF);
+						b_dummy = SSP1BUF;
+						SSP1BUF = ZDATA;
+						while (!SSP1STATbits.BF);
+						b_dummy = SSP1BUF;
+					}
 				}
 			}
 		}
@@ -94,6 +97,7 @@ void InterruptHandlerHigh(void)
 		Z.WR = LOW;
 		Z.M1 = LOW;
 		WAIT = LOW;
+		TRISD = 0xff; // output to memory or io from Z80
 	}
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 1 second timer int handler
