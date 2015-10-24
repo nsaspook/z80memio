@@ -35,11 +35,12 @@ extern "C" {
 #define IN				HIGH
 #define OUT				LOW
 
-#define	A10				PORTCbits.PORTC0 // RAM/ROM select LOW for ROM starting at address 0
+#define	A10				PORTCbits.RC0 // RAM/ROM select LOW for ROM starting at address 0
 #define WAIT			LATCbits.LATC1  // memory access delay
 #define	ZDATA			LATD
-#define ZRD				LATBbits.LATB4
-#define ZM1				LATBbits.LATB5
+#define ZRD				PORTBbits.RB4
+#define ZM1				PORTBbits.RB5
+#define ZRFSH 			PORTBbits.RB6
 
 #ifdef DLED_DEBUG
 #ifdef P46K22
@@ -83,6 +84,7 @@ extern "C" {
 		uint16_t RD : 1;
 		uint16_t WR : 1;
 		uint16_t M1 : 1;
+		uint16_t RFSH : 1;
 		uint16_t ISRAM : 1;
 		uint16_t S1 : 1;
 		uint16_t S2 : 1;
