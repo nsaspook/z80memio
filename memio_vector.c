@@ -63,7 +63,7 @@ void InterruptHandlerHigh(void)
 	if (Z.RUN) {
 		Z.RUN = FALSE;
 
-		if (Z.RFSH) {
+		if (!Z.RFSH) {
 			DLED7 = !DLED7;
 			if (Z.ISRAM) {
 				if (Z.MREQ) {
@@ -90,8 +90,12 @@ void InterruptHandlerHigh(void)
 		/*
 		 * toggle out of wait so Z80 can continue running
 		 * this needs to be in the window of one Z80 clk
+		 * Too LONG or SHORT will cause misreads of data
+		 * 11 nop opcodes seems to work
 		 */
 		WAIT = HIGH;
+		Nop();
+		Nop();
 		Nop();
 		Nop();
 		Nop();
