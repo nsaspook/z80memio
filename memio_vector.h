@@ -17,9 +17,9 @@ extern "C" {
 #include <timers.h>
 
 #define	TIMEROFFSET		32000           // timer0 16bit counter value for 1 second to overflow
-#define	PDELAY			28000	// refresh for I/O	
+#define	PDELAY			28000			// refresh for I/O	
 
-	/* DIO defines */
+	/* general DIO defines */
 #define LOW				(unsigned char)0        // digital output state levels, sink
 #define	HIGH            (unsigned char)1        // digital output state levels, source
 #define	ON				LOW       		//
@@ -27,7 +27,7 @@ extern "C" {
 #define	S_ON            LOW       		// low select/on for chip/led
 #define S_OFF           HIGH			// high deselect/off chip/led
 #define	R_ON            HIGH       		// control relay states, relay is on when output gate is high, uln2803,omron relays need the CPU at 5.5vdc to drive
-#define R_OFF           LOW			// control relay states
+#define R_OFF           LOW				// control relay states
 #define R_ALL_OFF       0x00
 #define R_ALL_ON		0xff
 #define NO				LOW
@@ -35,6 +35,7 @@ extern "C" {
 #define IN				HIGH
 #define OUT				LOW
 
+	/* Z80 pins */
 #define	A10				PORTCbits.RC0 // RAM/ROM select LOW for ROM starting at address 0
 #define WAIT			LATCbits.LATC1  // memory access delay
 #define	ZDATA			LATD
@@ -42,21 +43,9 @@ extern "C" {
 #define ZM1				PORTBbits.RB5
 #define ZRFSH 			PORTBbits.RB6
 
-#ifdef DLED_DEBUG
-#ifdef P46K22
-#define DLED0		LATDbits.LATD0
-#define DLED1		LATDbits.LATD1
-#define DLED2		LATDbits.LATD2
-#define DLED3		LATDbits.LATD3
-#define DLED4		LATDbits.LATD4
-#define DLED5		LATDbits.LATD5
-#define DLED6		LATAbits.LATA6
-#define DLED7		LATAbits.LATA7
-#endif
-#else
+	/* debug pins */
 #define DLED2			LATCbits.LATC2
 #define DLED7			LATCbits.LATC7
-#endif
 
 #ifdef INTTYPES
 #include <stdint.h>
