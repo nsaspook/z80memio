@@ -179,7 +179,6 @@ void config_pic_io(void)
 	/* clear SPI module possible flag */
 	PIR1bits.SSPIF = LOW;
 
-
 	/*
 	 * PORTB config
 	 */
