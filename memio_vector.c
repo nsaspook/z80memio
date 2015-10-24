@@ -12,22 +12,22 @@ void InterruptHandlerHigh(void)
 	static union Timers timer;
 
 	/* Z80 Control routines */
+	DLED2 = HIGH;
 
 	/*
 	 * MREQ
 	 */
 	if (INTCONbits.INT0IF) {
 		INTCONbits.INT0IF = LOW;
-		DLED2 = HIGH;
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
 		Z.maddr = PORTA;
 		//		Z.maddr += ((uint16_t) PORTE << 8);
 		Z.ISRAM = A10;
 		Z.WR = ZRD;
-		Z.M1 = ZM1;
-		Z.RFSH = ZRFSH;
-		if (Z.M1 == ON) {
+		Z.M1 = !ZM1;
+		Z.RFSH = !ZRFSH;
+		if (Z.M1) {
 			Z.paddr = Z.maddr;
 		}
 		if (Z.WR) { //write to pic
@@ -57,12 +57,14 @@ void InterruptHandlerHigh(void)
 	if (INTCON3bits.INT2IF) {
 		INTCON3bits.INT2IF = LOW;
 		TRISD = 0xff; // output to memory or io from Z80
+		Z.WR = TRUE;
 	}
 
 	if (Z.RUN) {
 		Z.RUN = FALSE;
-		DLED7 = !DLED7;
-		if (Z.RFSH == OFF) {
+
+		if (Z.RFSH) {
+			DLED7 = !DLED7;
 			if (Z.ISRAM) {
 				if (Z.MREQ) {
 					if (Z.WR) {
@@ -74,7 +76,7 @@ void InterruptHandlerHigh(void)
 			} else {
 				if (Z.MREQ) {
 					ZDATA = z80_rom[Z.paddr];
-					if (Z.M1 == ON) {
+					if (Z.M1) {
 						SSP1BUF = Z.paddr;
 						while (!SSP1STATbits.BF);
 						b_dummy = SSP1BUF;
@@ -85,19 +87,29 @@ void InterruptHandlerHigh(void)
 				}
 			}
 		}
+		/*
+		 * toggle out of wait so Z80 can continue running
+		 * this needs to be in the window of one Z80 clk
+		 */
 		WAIT = HIGH;
 		Nop();
 		Nop();
 		Nop();
 		Nop();
 		Nop();
+		Nop();
+		Nop();
+		Nop();
+		Nop();
+		WAIT = LOW;
+
 		Z.ISRAM = LOW;
 		Z.MREQ = LOW;
 		Z.IORQ = LOW;
 		Z.WR = LOW;
 		Z.M1 = LOW;
-		WAIT = LOW;
-		TRISD = 0xff; // output to memory or io from Z80
+		Z.RFSH = LOW;
+		if (ZRD) TRISD = 0xff; // output to memory or io from Z80
 	}
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 1 second timer int handler
