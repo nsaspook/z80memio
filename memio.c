@@ -5,6 +5,10 @@
  * memory/io emulator for Z80, slow but works
  *
  * nsaspook    2015
+ * 
+ * edge connector
+ * D0--D7 1--8, A0--A10 9--19
+ * A +5, Z GND, F WAIT_, P MREQ_, K IORQ_, N RD_, M WR_, J M!_, L RFSH_
  */
 
 #define P46K22
