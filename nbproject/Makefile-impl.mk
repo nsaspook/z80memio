@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=z80memio.X
+PROJECTNAME=z80memio
 
 # Active Configuration
 DEFAULTCONF=default

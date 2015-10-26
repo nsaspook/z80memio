@@ -224,6 +224,9 @@ void main(void) /* SPI Master/Slave loopback */
 	check_config();
 
 	while (TRUE) { // just loop
-		Nop();
+		while (!ZRFSH) {
+			WAIT = HIGH; /* clear the wait signal so the Z80 can process the data */
+		}
+		WAIT=LOW;
 	}
 }
