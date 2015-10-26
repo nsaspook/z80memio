@@ -225,19 +225,19 @@ void main(void) /* SPI Master/Slave loopback */
 
 	while (TRUE) { // just loop
 		if (!ZRFSH) {
-		WAIT = HIGH; /* clear the wait signal so the Z80 can process the data */
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		Nop();
-		WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
+			WAIT = HIGH; /* clear the wait signal so the Z80 can process the data */
+			Nop();
+			Nop();
+			Nop();
+			Nop();
+			Nop();
+			Nop();
+			Nop();
+			Nop();
+			Nop();
+			Nop();
+			Nop();
+			WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
 		}
 	}
 }
