@@ -112,8 +112,6 @@ void InterruptHandlerHigh(void)
 		Nop();
 		Nop();
 		Nop();
-		Nop();
-		Nop();
 		WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
 
 		/*
