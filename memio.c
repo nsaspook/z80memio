@@ -224,6 +224,7 @@ void main(void) /* SPI Master/Slave loopback */
 	check_config();
 
 	while (TRUE) { // just loop
+		INTCONbits.GIEH = LOW;
 		if (!ZRFSH) {
 			WAIT = HIGH; /* clear the wait signal so the Z80 can process the data */
 			Nop();
@@ -239,5 +240,7 @@ void main(void) /* SPI Master/Slave loopback */
 			Nop();
 			WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
 		}
+		INTCONbits.GIEH = HIGH;
+		Nop();
 	}
 }
