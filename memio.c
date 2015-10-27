@@ -9,6 +9,10 @@
  * edge connector
  * D0--D7 1--8, A0--A10 9--19
  * A +5, Z GND, F WAIT_, P MREQ_, K IORQ_, N RD_, M WR_, J M!_, L RFSH_
+ * S BUSREQ_, C INT_, D NMI
+ * 
+ * debug port pins
+ * 1 wait, 2 gmreq, 3 dled2, 4 mreq, 5 rfsh, 6 sck, 7 sdo
  */
 
 #define P46K22
@@ -224,23 +228,22 @@ void main(void) /* SPI Master/Slave loopback */
 	check_config();
 
 	while (TRUE) { // just loop
-		INTCONbits.GIEH = LOW;
-		if (!ZRFSH) {
-			WAIT = HIGH; /* clear the wait signal so the Z80 can process the data */
-			Nop();
-			Nop();
-			Nop();
-			Nop();
-			Nop();
-			Nop();
-			Nop();
-			Nop();
-			Nop();
-			Nop();
-			Nop();
-			WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
-		}
-		INTCONbits.GIEH = HIGH;
+		/*		INTCONbits.GIEH = LOW;
+				if (!ZRFSH) {
+					WAIT = HIGH; 
+					Nop();
+					Nop();
+					Nop();
+					Nop();
+					Nop();
+					Nop();
+					Nop();
+					Nop();
+					Nop();
+					Nop();
+					WAIT = LOW; 
+				}
+				INTCONbits.GIEH = HIGH; */
 		Nop();
 	}
 }
