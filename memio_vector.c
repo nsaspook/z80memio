@@ -94,6 +94,14 @@ void InterruptHandlerHigh(void)
 				}
 			}
 		}
+
+		/* slow the instruction cycle down to 1 pre second */
+		INTCONbits.TMR0IF = LOW; //clear interrupt flag
+		timer.lt = TIMEROFFSET; // Copy timer value into union so we don't call a function in the ISR
+		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
+		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
+		while (!INTCONbits.TMR0IF);
+
 		/*
 		 * toggle out of wait so Z80 can continue running
 		 * this needs to be in the window of one Z80 clk
@@ -101,7 +109,6 @@ void InterruptHandlerHigh(void)
 		 * 11 to 13 nop opcodes seems to work
 		 */
 		WAIT = HIGH; /* clear the wait signal so the Z80 can process the data */
-		Nop();
 		Nop();
 		Nop();
 		Nop();
