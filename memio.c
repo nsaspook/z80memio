@@ -110,8 +110,8 @@ const rom int8_t *build_date = __DATE__, *build_time = __TIME__;
 volatile uint8_t data_in2;
 volatile uint8_t WDT_TO = FALSE, EEP_ER = FALSE;
 volatile struct z80_type Z = {0};
-//volatile struct spi_link_type spi_link;
-//volatile struct ringBufS_t ring_buf5, ring_buf6;
+volatile struct spi_link_type spi_link;
+volatile struct ringBufS_t ring_buf5, ring_buf6;
 
 void InterruptHandlerHigh(void);
 //High priority interrupt vector
@@ -208,10 +208,10 @@ void config_pic_io(void)
 	IOCB = 0x00;
 	z = PORTB; // dummy read 
 
-//	spi_link.tx1b = &ring_buf5;
-//	spi_link.tx1a = &ring_buf6;
-//	ringBufS_init(spi_link.tx1b);
-//	ringBufS_init(spi_link.tx1a);
+	spi_link.tx1b = &ring_buf5;
+	spi_link.tx1a = &ring_buf6;
+	ringBufS_init(spi_link.tx1b);
+	ringBufS_init(spi_link.tx1a);
 
 	/* Enable interrupt priority */
 	RCONbits.IPEN = HIGH;
