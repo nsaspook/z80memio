@@ -15,7 +15,6 @@
  */
 void init_display(void)
 {
-	SLED = HIGH;
 	wdtdelay(350000); // > 400ms power up delay
 	stdout = _H_USER; // use our STDOUT handler
 	ringBufS_put(spi_link.tx1b, 0x139);
@@ -30,7 +29,6 @@ void init_display(void)
 	ringBufS_put(spi_link.tx1b, 0x106);
 	start_lcd();
 	wait_lcd();
-	SLED = LOW;
 }
 
 /*
