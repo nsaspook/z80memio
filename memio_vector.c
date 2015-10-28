@@ -13,12 +13,12 @@ void InterruptHandlerHigh(void)
 	static union Timers timer;
 
 	/* Z80 Control routines */
-	DLED2 = HIGH;
 
 	/*
 	 * MREQ from Z80
 	 */
 	if (INTCONbits.INT0IF) {
+		DLED2 = HIGH;
 		INTCONbits.INT0IF = LOW;
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
@@ -28,9 +28,7 @@ void InterruptHandlerHigh(void)
 		Z.WR = ZRD;
 		Z.M1 = !ZM1;
 		Z.RFSH = !ZRFSH;
-		if (Z.M1) {
-			Z.paddr = Z.maddr;
-		}
+		Z.paddr = PORTA;
 		if (Z.WR) { //write to pic
 			TRISD = 0xff; // output to memory or io from Z80
 		} else {
@@ -67,34 +65,6 @@ void InterruptHandlerHigh(void)
 	if (Z.RUN) {
 		Z.RUN = FALSE;
 
-		if (!Z.RFSH) { /* don't process memory refresh cycles */
-			DLED7 = !DLED7;
-			if (Z.ISRAM) { /* RAM access */
-				if (Z.MREQ) {
-					if (Z.WR) {
-						z80_ram[Z.maddr & 0xff] = PORTD;
-					} else {
-						ZDATA = z80_ram[Z.maddr & 0xff];
-					}
-				}
-			} else { /* ROM access */
-				if (Z.MREQ) {
-					ZDATA = z80_rom[Z.paddr];
-					if (Z.M1) { /* opcode */
-						/*
-						 * send the address and opcode via SPI for debug
-						 */
-						SSP1BUF = Z.paddr;
-						while (!SSP1STATbits.BF);
-						b_dummy = SSP1BUF;
-						SSP1BUF = ZDATA;
-						while (!SSP1STATbits.BF);
-						b_dummy = SSP1BUF;
-					}
-				}
-			}
-		}
-
 		/* slow the instruction cycle down to 1 pre second */
 		INTCONbits.TMR0IF = LOW; //clear interrupt flag
 		timer.lt = TIMEROFFSET; // Copy timer value into union so we don't call a function in the ISR
@@ -120,6 +90,34 @@ void InterruptHandlerHigh(void)
 		Nop();
 		Nop();
 		WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
+
+		if (!Z.RFSH) { /* don't process memory refresh cycles */
+			DLED7 = !DLED7;
+			if (Z.ISRAM) { /* RAM access */
+				if (Z.MREQ) {
+					if (Z.WR) {
+						z80_ram[Z.maddr & 0xff] = PORTD;
+					} else {
+						ZDATA = z80_ram[Z.maddr & 0xff];
+					}
+				}
+			} else { /* ROM access */
+				if (Z.MREQ) {
+					ZDATA = z80_rom[Z.paddr];
+					if (!ZM1) { /* opcode */
+						/*
+						 * send the address and opcode via SPI for debug
+						 */
+						SSP1BUF = Z.paddr;
+						while (!SSP1STATbits.BF);
+						b_dummy = SSP1BUF;
+						SSP1BUF = z80_rom[Z.paddr];
+						while (!SSP1STATbits.BF);
+						b_dummy = SSP1BUF;
+					}
+				}
+			}
+		}
 
 		/*
 		 * reset the state machine

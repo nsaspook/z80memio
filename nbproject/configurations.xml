@@ -5,6 +5,8 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>memio_vector.h</itemPath>
+      <itemPath>eadog.h</itemPath>
+      <itemPath>ringbufs.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -15,6 +17,8 @@
                    projectFiles="true">
       <itemPath>memio.c</itemPath>
       <itemPath>memio_vector.c</itemPath>
+      <itemPath>eadog.c</itemPath>
+      <itemPath>ringbufs.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

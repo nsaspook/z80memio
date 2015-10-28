@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=memio.c memio_vector.c
+SOURCEFILES_QUOTED_IF_SPACED=memio.c memio_vector.c eadog.c ringbufs.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/memio.o ${OBJECTDIR}/memio_vector.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/memio.o.d ${OBJECTDIR}/memio_vector.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/memio.o ${OBJECTDIR}/memio_vector.o ${OBJECTDIR}/eadog.o ${OBJECTDIR}/ringbufs.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/memio.o.d ${OBJECTDIR}/memio_vector.o.d ${OBJECTDIR}/eadog.o.d ${OBJECTDIR}/ringbufs.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/memio.o ${OBJECTDIR}/memio_vector.o
+OBJECTFILES=${OBJECTDIR}/memio.o ${OBJECTDIR}/memio_vector.o ${OBJECTDIR}/eadog.o ${OBJECTDIR}/ringbufs.o
 
 # Source Files
-SOURCEFILES=memio.c memio_vector.c
+SOURCEFILES=memio.c memio_vector.c eadog.c ringbufs.c
 
 
 CFLAGS=
@@ -105,6 +105,22 @@ ${OBJECTDIR}/memio_vector.o: memio_vector.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/memio_vector.o 
 	@${FIXDEPS} "${OBJECTDIR}/memio_vector.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
+${OBJECTDIR}/eadog.o: eadog.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/eadog.o.d 
+	@${RM} ${OBJECTDIR}/eadog.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -ml --extended -I ${MP_CC_DIR}/../h  -fo ${OBJECTDIR}/eadog.o   eadog.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/eadog.o 
+	@${FIXDEPS} "${OBJECTDIR}/eadog.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
+	
+${OBJECTDIR}/ringbufs.o: ringbufs.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/ringbufs.o.d 
+	@${RM} ${OBJECTDIR}/ringbufs.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -ml --extended -I ${MP_CC_DIR}/../h  -fo ${OBJECTDIR}/ringbufs.o   ringbufs.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/ringbufs.o 
+	@${FIXDEPS} "${OBJECTDIR}/ringbufs.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
+	
 else
 ${OBJECTDIR}/memio.o: memio.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -121,6 +137,22 @@ ${OBJECTDIR}/memio_vector.o: memio_vector.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -ml --extended -I ${MP_CC_DIR}/../h  -fo ${OBJECTDIR}/memio_vector.o   memio_vector.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/memio_vector.o 
 	@${FIXDEPS} "${OBJECTDIR}/memio_vector.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
+	
+${OBJECTDIR}/eadog.o: eadog.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/eadog.o.d 
+	@${RM} ${OBJECTDIR}/eadog.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -ml --extended -I ${MP_CC_DIR}/../h  -fo ${OBJECTDIR}/eadog.o   eadog.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/eadog.o 
+	@${FIXDEPS} "${OBJECTDIR}/eadog.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
+	
+${OBJECTDIR}/ringbufs.o: ringbufs.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/ringbufs.o.d 
+	@${RM} ${OBJECTDIR}/ringbufs.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -ml --extended -I ${MP_CC_DIR}/../h  -fo ${OBJECTDIR}/ringbufs.o   ringbufs.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/ringbufs.o 
+	@${FIXDEPS} "${OBJECTDIR}/ringbufs.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 endif
 

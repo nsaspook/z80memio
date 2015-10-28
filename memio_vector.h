@@ -29,7 +29,7 @@ extern "C" {
 #define	S_ON            LOW       		// low select/on for chip/led
 #define S_OFF           HIGH			// high deselect/off chip/led
 #define	R_ON            HIGH       		// control relay states, relay is on when output gate is high, uln2803,omron relays need the CPU at 5.5vdc to drive
-#define R_OFF           LOW				// control relay states
+#define R_OFF           LOW			// control relay states
 #define R_ALL_OFF       0x00
 #define R_ALL_ON	0xff
 #define NO		LOW

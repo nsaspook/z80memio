@@ -97,7 +97,7 @@
 uint8_t volatile z80_ram[256];
 /* short testing program of opcodes and calls */
 const rom int8_t z80_rom[1024] = {
-	0x00, 0xc7, 0xc7, 0x76, 0x76, 0x76, 0x76, 0x76,
+	0x00, 0xf3, 0xcf, 0x76, 0x76, 0x76, 0x76, 0x76,
 	0xf3, 0x00, 0xf3, 0x00, 0xd7, 0x76, 0x76, 0x76,
 	0x00, 0xf3, 0x00, 0xf3, 0xdf, 0x76, 0x76, 0x76,
 	0xc7, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76
@@ -110,6 +110,8 @@ const rom int8_t *build_date = __DATE__, *build_time = __TIME__;
 volatile uint8_t data_in2;
 volatile uint8_t WDT_TO = FALSE, EEP_ER = FALSE;
 volatile struct z80_type Z = {0};
+volatile struct spi_link_type spi_link;
+volatile struct ringBufS_t ring_buf5, ring_buf6;
 
 void InterruptHandlerHigh(void);
 //High priority interrupt vector
@@ -206,6 +208,11 @@ void config_pic_io(void)
 	IOCB = 0x00;
 	z = PORTB; // dummy read 
 
+	spi_link.tx1b = &ring_buf5;
+	spi_link.tx1a = &ring_buf6;
+	ringBufS_init(spi_link.tx1b);
+	ringBufS_init(spi_link.tx1a);
+
 	/* Enable interrupt priority */
 	RCONbits.IPEN = HIGH;
 	/* Enable priority interrupts */
@@ -223,27 +230,28 @@ void check_config(void)
 	config_pic_io();
 }
 
+/*
+ * value of 1 for 3.6us, 10 for 15us, 100 = 126us, 1000 for 1256us
+ */
+void wdtdelay(uint32_t delay)
+{
+	static uint32_t dcount;
+	for (dcount = 0; dcount <= delay; dcount++) { // delay a bit
+		Nop();
+		ClrWdt(); // reset the WDT timer
+	};
+}
+
 void main(void) /* SPI Master/Slave loopback */
 {
 	check_config();
 
 	while (TRUE) { // just loop
-		/*		INTCONbits.GIEH = LOW;
-				if (!ZRFSH) {
-					WAIT = HIGH; 
-					Nop();
-					Nop();
-					Nop();
-					Nop();
-					Nop();
-					Nop();
-					Nop();
-					Nop();
-					Nop();
-					Nop();
-					WAIT = LOW; 
-				}
-				INTCONbits.GIEH = HIGH; */
-		Nop();
+		if (!ZRFSH) {
+			WAIT = HIGH;
+		} else {
+			WAIT = LOW;
+		}
+
 	}
 }
