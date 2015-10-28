@@ -18,7 +18,7 @@ void InterruptHandlerHigh(void)
 	 * MREQ from Z80
 	 */
 	if (INTCONbits.INT0IF) {
-		DLED2 = HIGH;
+
 		INTCONbits.INT0IF = LOW;
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
@@ -65,12 +65,38 @@ void InterruptHandlerHigh(void)
 	if (Z.RUN) {
 		Z.RUN = FALSE;
 
-		/* slow the instruction cycle down to 1 pre second */
-		INTCONbits.TMR0IF = LOW; //clear interrupt flag
-		timer.lt = TIMEROFFSET; // Copy timer value into union so we don't call a function in the ISR
-		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
-		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
-		while (!INTCONbits.TMR0IF);
+		/* slow the instruction cycle down to 1 per second */
+//		INTCONbits.TMR0IF = LOW; //clear interrupt flag
+//		timer.lt = TIMEROFFSET; // Copy timer value into union so we don't call a function in the ISR
+//		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
+//		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
+//		while (!INTCONbits.TMR0IF);
+
+		DLED7 = !DLED7;
+		if (Z.ISRAM) { /* RAM access */
+			if (Z.MREQ) {
+				if (Z.WR) {
+					z80_ram[Z.maddr & 0xff] = PORTD;
+				} else {
+					ZDATA = z80_ram[Z.maddr & 0xff];
+				}
+			}
+		} else { /* ROM access */
+			if (Z.MREQ) {
+				ZDATA = z80_rom[Z.paddr];
+				if (Z.M1) { /* opcode */
+					/*
+					 * send the address and opcode via SPI for debug
+					 */
+					SSP1BUF = Z.paddr;
+					while (!SSP1STATbits.BF);
+					b_dummy = SSP1BUF;
+					SSP1BUF = z80_rom[Z.paddr];
+					while (!SSP1STATbits.BF);
+					b_dummy = SSP1BUF;
+				}
+			}
+		}
 
 		/*
 		 * toggle out of wait so Z80 can continue running
@@ -78,6 +104,7 @@ void InterruptHandlerHigh(void)
 		 * Too LONG or SHORT will cause misreads of data
 		 * 11 to 13 nop opcodes seems to work
 		 */
+		DLED2 = HIGH;
 		WAIT = HIGH; /* clear the wait signal so the Z80 can process the data */
 		Nop();
 		Nop();
@@ -89,35 +116,9 @@ void InterruptHandlerHigh(void)
 		Nop();
 		Nop();
 		Nop();
+		Nop();
 		WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
-
-		if (!Z.RFSH) { /* don't process memory refresh cycles */
-			DLED7 = !DLED7;
-			if (Z.ISRAM) { /* RAM access */
-				if (Z.MREQ) {
-					if (Z.WR) {
-						z80_ram[Z.maddr & 0xff] = PORTD;
-					} else {
-						ZDATA = z80_ram[Z.maddr & 0xff];
-					}
-				}
-			} else { /* ROM access */
-				if (Z.MREQ) {
-					ZDATA = z80_rom[Z.paddr];
-					if (!ZM1) { /* opcode */
-						/*
-						 * send the address and opcode via SPI for debug
-						 */
-						SSP1BUF = Z.paddr;
-						while (!SSP1STATbits.BF);
-						b_dummy = SSP1BUF;
-						SSP1BUF = z80_rom[Z.paddr];
-						while (!SSP1STATbits.BF);
-						b_dummy = SSP1BUF;
-					}
-				}
-			}
-		}
+		DLED2 = LOW;
 
 		/*
 		 * reset the state machine
@@ -146,7 +147,7 @@ void InterruptHandlerHigh(void)
 		PIR1bits.SSPIF = LOW;
 		data_in2 = SSP1BUF; // read the buffer quickly
 	}
-	DLED2 = LOW;
+
 }
 #pragma	tmpdata
 
