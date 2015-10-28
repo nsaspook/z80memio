@@ -31,6 +31,18 @@ extern "C" {
 #define LCD_CMD_SET		0x100
 #define LCD_CLEAR_HOME	0x04
 
+#define EADOGM_CMD_CLR		1
+#define EADOGM_CMD_CURSOR_ON     0b00001111
+#define EADOGM_CMD_CURSOR_OFF    0b00001100
+#define EADOGM_CMD_DISPLAY_ON    0b00001100
+#define EADOGM_CMD_DISPLAY_OFF   0b00001000
+#define EADOGM_CMD_DDRAM_ADDR    0b10000000
+#define EADOGM_CMD_CGRAM_ADDR    0b01000000
+#define EADOGM_CMD_SELECT_R0     0b00011000
+#define EADOGM_CMD_SELECT_R1     0b00010000
+#define EADOGM_CMD_SET_TABLE2    0b00101010
+#define EADOGM_COLSPAN		16
+
 	extern volatile struct spi_link_type spi_link;
 	extern void wdtdelay(uint32_t);
 
