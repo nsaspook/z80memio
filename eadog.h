@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 #include <spi.h>
-#include "light_link.h"
+#include "memio_vector.h"
 
 #define LCD_CMD_MASK	0x01
 #define LCD_CMD_SET		0x100
