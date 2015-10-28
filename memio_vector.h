@@ -18,7 +18,7 @@ extern "C" {
 #include <timers.h>
 #include "ringbufs.h"
 
-#define	TIMEROFFSET	32000           // timer0 16bit counter value for 1 second to overflow
+#define	TIMEROFFSET	32000			// timer0 16bit counter value for 1 second to overflow
 #define	PDELAY		28000			// refresh for I/O	
 
 	/* general DIO defines */
