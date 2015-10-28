@@ -97,7 +97,7 @@
 uint8_t volatile z80_ram[256];
 /* short testing program of opcodes and calls */
 const rom int8_t z80_rom[1024] = {
-	0x00, 0xf3, 0xcf, 0x76, 0x76, 0x76, 0x76, 0x76,
+	0x00, 0xf3, 0x00, 0xcf, 0x76, 0x76, 0x76, 0x76,
 	0xf3, 0x00, 0xf3, 0x00, 0xd7, 0x76, 0x76, 0x76,
 	0x00, 0xf3, 0x00, 0xf3, 0xdf, 0x76, 0x76, 0x76,
 	0xc7, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76, 0x76
@@ -110,8 +110,8 @@ const rom int8_t *build_date = __DATE__, *build_time = __TIME__;
 volatile uint8_t data_in2;
 volatile uint8_t WDT_TO = FALSE, EEP_ER = FALSE;
 volatile struct z80_type Z = {0};
-volatile struct spi_link_type spi_link;
-volatile struct ringBufS_t ring_buf5, ring_buf6;
+//volatile struct spi_link_type spi_link;
+//volatile struct ringBufS_t ring_buf5, ring_buf6;
 
 void InterruptHandlerHigh(void);
 //High priority interrupt vector
@@ -198,20 +198,20 @@ void config_pic_io(void)
 	INTCON2bits.INTEDG0 = LOW; // falling edge
 	INTCONbits.INT0IF = LOW; // clean possible flag
 
-	INTCON3bits.INT1IE = HIGH; //
+	INTCON3bits.INT1IE = LOW; //
 	INTCON2bits.INTEDG1 = LOW; // falling edge
 	INTCON3bits.INT1IF = LOW; // clean possible flag
 
-	INTCON3bits.INT2IE = HIGH; //
+	INTCON3bits.INT2IE = LOW; //
 	INTCON2bits.INTEDG2 = LOW; // falling edge
 	INTCON3bits.INT2IF = LOW; // clean possible flag
 	IOCB = 0x00;
 	z = PORTB; // dummy read 
 
-	spi_link.tx1b = &ring_buf5;
-	spi_link.tx1a = &ring_buf6;
-	ringBufS_init(spi_link.tx1b);
-	ringBufS_init(spi_link.tx1a);
+//	spi_link.tx1b = &ring_buf5;
+//	spi_link.tx1a = &ring_buf6;
+//	ringBufS_init(spi_link.tx1b);
+//	ringBufS_init(spi_link.tx1a);
 
 	/* Enable interrupt priority */
 	RCONbits.IPEN = HIGH;
