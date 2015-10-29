@@ -38,7 +38,6 @@ void InterruptHandlerHigh(void)
 	 * IORQ from Z80
 	 */
 	if (INTCON3bits.INT1IF) {
-		DLED2 = HIGH;
 		INTCON3bits.INT1IF = LOW;
 		Z.IORQ = HIGH;
 		Z.RUN = TRUE;
@@ -74,6 +73,7 @@ void InterruptHandlerHigh(void)
 
 		DLED7 = !DLED7;
 		if (Z.ISRAM) { /* RAM access */
+			DLED2 = HIGH;
 			if (Z.MREQ) {
 				if (Z.WR) {
 					z80_ram[Z.maddr & 0xff] = ZDATA_I;
@@ -129,8 +129,8 @@ void InterruptHandlerHigh(void)
 		Nop();
 		Nop();
 		Nop();
-//		Nop();
-//		Nop();
+		//		Nop();
+		//		Nop();
 		WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
 		DLED2 = LOW;
 
