@@ -194,11 +194,12 @@ void config_pic_io(void)
 	 */
 	INTCON2bits.RBPU = LOW; // turn on weak pullups
 	INTCONbits.RBIE = LOW; // disable PORTB interrupts
+	
 	INTCONbits.INT0IE = HIGH; //
 	INTCON2bits.INTEDG0 = LOW; // falling edge
 	INTCONbits.INT0IF = LOW; // clean possible flag
 
-	INTCON3bits.INT1IE = LOW; //
+	INTCON3bits.INT1IE = HIGH; //
 	INTCON2bits.INTEDG1 = LOW; // falling edge
 	INTCON3bits.INT1IF = LOW; // clean possible flag
 
