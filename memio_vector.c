@@ -114,7 +114,7 @@ void InterruptHandlerHigh(void)
 		 * toggle out of wait so Z80 can continue running
 		 * this needs to be in the window of one Z80 clk
 		 * Too LONG or SHORT will cause misreads of data
-		 * 11 to 13 nop opcodes seems to work
+		 * 10 to 13 nop opcodes seems to work
 		 */
 
 		WAIT = HIGH; /* clear the wait signal so the Z80 can process the data */
