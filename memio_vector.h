@@ -17,8 +17,12 @@ extern "C" {
 #include <GenericTypeDefs.h>
 #include <timers.h>
 #include "ringbufs.h"
+	
+#define DEBUG_MEM	FALSE
+#define DEBUG_IO	TRUE
 
-#define	TIMEROFFSET	32000			// timer0 16bit counter value for 1 second to overflow
+#define	TIMEROFFSET	32000			// timer0 16bit counter value for ~1 second to overflow
+#define Z80_STEP	56000
 #define	PDELAY		28000			// refresh for I/O	
 
 	/* general DIO defines */
