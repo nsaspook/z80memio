@@ -63,7 +63,6 @@ void InterruptHandlerHigh(void)
 	 */
 	if (Z.RUN) {
 		Z.RUN = FALSE;
-
 		/* slow the instruction cycle down to 1 per second */
 		INTCONbits.TMR0IF = LOW; //clear interrupt flag
 		timer.lt = Z80_STEP; // Copy timer value into union so we don't call a function in the ISR
