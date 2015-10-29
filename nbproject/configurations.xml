@@ -29,6 +29,9 @@
       <itemPath>/sdd/PIC/z80/DS006824.pdf</itemPath>
       <itemPath>/sdd/PIC/z80/datasheet.pdf</itemPath>
       <itemPath>/sdd/PIC/z80/41412F.pdf</itemPath>
+      <itemPath>../HP_led_display.pdf</itemPath>
+      <itemPath>../z0840006-datasheet-zilog.pdf</itemPath>
+      <itemPath>../1801376.pdf</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
