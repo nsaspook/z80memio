@@ -18,7 +18,6 @@ void InterruptHandlerHigh(void)
 	 * MREQ from Z80
 	 */
 	if (INTCONbits.INT0IF) {
-
 		INTCONbits.INT0IF = LOW;
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
@@ -66,11 +65,11 @@ void InterruptHandlerHigh(void)
 		Z.RUN = FALSE;
 
 		/* slow the instruction cycle down to 1 per second */
-//		INTCONbits.TMR0IF = LOW; //clear interrupt flag
-//		timer.lt = TIMEROFFSET; // Copy timer value into union so we don't call a function in the ISR
-//		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
-//		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
-//		while (!INTCONbits.TMR0IF);
+		INTCONbits.TMR0IF = LOW; //clear interrupt flag
+		timer.lt = TIMEROFFSET; // Copy timer value into union so we don't call a function in the ISR
+		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
+		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
+		while (!INTCONbits.TMR0IF);
 
 		DLED7 = !DLED7;
 		if (Z.ISRAM) { /* RAM access */
