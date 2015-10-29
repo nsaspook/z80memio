@@ -105,7 +105,7 @@ extern "C" {
 
 	extern volatile struct z80_type Z;
 	extern volatile uint8_t z80_ram[256];
-	extern const rom int8_t z80_rom[1024];
+	extern const rom unsigned char z80_rom[256];
 	extern volatile uint8_t data_in2;
 
 #ifdef	__cplusplus
