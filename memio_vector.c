@@ -66,11 +66,11 @@ void InterruptHandlerHigh(void)
 		Z.RUN = FALSE;
 
 		/* slow the instruction cycle down to 1 per second */
-//		INTCONbits.TMR0IF = LOW; //clear interrupt flag
-//		timer.lt = TIMEROFFSET; // Copy timer value into union so we don't call a function in the ISR
-//		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
-//		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
-//		while (!INTCONbits.TMR0IF);
+		INTCONbits.TMR0IF = LOW; //clear interrupt flag
+		timer.lt = Z80_STEP; // Copy timer value into union so we don't call a function in the ISR
+		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
+		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
+		while (!INTCONbits.TMR0IF);
 
 		DLED7 = !DLED7;
 		if (Z.ISRAM) { /* RAM access */
@@ -84,7 +84,7 @@ void InterruptHandlerHigh(void)
 		} else { /* ROM access */
 			if (Z.MREQ) {
 				ZDATA_O = z80_rom[Z.paddr];
-				if (Z.M1) { /* opcode */
+				if (DEBUG_MEM && Z.M1) { /* opcode */
 					/*
 					 * send the address and opcode via SPI for debug
 					 */
@@ -97,6 +97,7 @@ void InterruptHandlerHigh(void)
 				}
 			}
 			if (Z.IORQ) {
+				if (DEBUG_IO) {
 					/*
 					 * send the port and data via SPI for debug
 					 */
@@ -106,6 +107,7 @@ void InterruptHandlerHigh(void)
 					SSP1BUF = ZDATA_I;
 					while (!SSP1STATbits.BF);
 					b_dummy = SSP1BUF;
+				}
 			}
 		}
 
@@ -127,7 +129,8 @@ void InterruptHandlerHigh(void)
 		Nop();
 		Nop();
 		Nop();
-		Nop();
+//		Nop();
+//		Nop();
 		WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
 		DLED2 = LOW;
 
