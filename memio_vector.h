@@ -40,10 +40,14 @@ extern "C" {
 	/* Z80 pins */
 #define	A10		PORTCbits.RC0 // RAM/ROM select LOW for ROM starting at address 0
 #define WAIT		LATCbits.LATC1  // memory access delay
-#define	ZDATA		LATD
+#define	ZDATA_O		LATD
+#define ZDATA_I		PORTD
+#define ADDR_LOW	PORTA
+#define ADDR_HIGH	PORTE
 #define ZRD		PORTBbits.RB4
 #define ZM1		PORTBbits.RB5
 #define ZRFSH 		PORTBbits.RB6
+#define ZWR		PORTBbits.RB7
 
 	/* debug pins */
 #define DLED2		LATCbits.LATC2
