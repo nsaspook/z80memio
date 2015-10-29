@@ -96,7 +96,7 @@
 /* Z80 memory variables */
 uint8_t volatile z80_ram[256];
 
-/* short testing program of opcodes and calls using the SDCC -mz80 compiler
+/* short test program of opcodes, memory and io using the SDCC -mz80 compiler
 
 __sfr __at 0xff IoPort;
 volatile __at (0x0400) unsigned char chk;
