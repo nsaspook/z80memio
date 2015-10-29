@@ -1,7 +1,7 @@
                               1 ;--------------------------------------------------------
                               2 ; File Created by SDCC : free open source ANSI-C Compiler
                               3 ; Version 3.4.0 #8981 (Jul  5 2014) (Linux)
-                              4 ; This file was generated Thu Oct 29 09:02:13 2015
+                              4 ; This file was generated Thu Oct 29 13:22:03 2015
                               5 ;--------------------------------------------------------
                               6 	.module untitled0
                               7 	.optsdcc -mz80
@@ -10,52 +10,58 @@
                              10 ; Public variables in this module
                              11 ;--------------------------------------------------------
                              12 	.globl _main
-                             13 ;--------------------------------------------------------
-                             14 ; special function registers
-                             15 ;--------------------------------------------------------
-                     00FF    16 _IoPort	=	0x00ff
-                             17 ;--------------------------------------------------------
-                             18 ; ram data
-                             19 ;--------------------------------------------------------
-                             20 	.area _DATA
-                             21 ;--------------------------------------------------------
-                             22 ; ram data
+                             13 	.globl _chk
+                             14 ;--------------------------------------------------------
+                             15 ; special function registers
+                             16 ;--------------------------------------------------------
+                     00FF    17 _IoPort	=	0x00ff
+                             18 ;--------------------------------------------------------
+                             19 ; ram data
+                             20 ;--------------------------------------------------------
+                             21 	.area _DATA
+                     0400    22 _chk	=	0x0400
                              23 ;--------------------------------------------------------
-                             24 	.area _INITIALIZED
+                             24 ; ram data
                              25 ;--------------------------------------------------------
-                             26 ; absolute external ram data
+                             26 	.area _INITIALIZED
                              27 ;--------------------------------------------------------
-                             28 	.area _DABS (ABS)
+                             28 ; absolute external ram data
                              29 ;--------------------------------------------------------
-                             30 ; global & static initialisations
+                             30 	.area _DABS (ABS)
                              31 ;--------------------------------------------------------
-                             32 	.area _HOME
-                             33 	.area _GSINIT
-                             34 	.area _GSFINAL
+                             32 ; global & static initialisations
+                             33 ;--------------------------------------------------------
+                             34 	.area _HOME
                              35 	.area _GSINIT
-                             36 ;--------------------------------------------------------
-                             37 ; Home
+                             36 	.area _GSFINAL
+                             37 	.area _GSINIT
                              38 ;--------------------------------------------------------
-                             39 	.area _HOME
-                             40 	.area _HOME
-                             41 ;--------------------------------------------------------
-                             42 ; code
+                             39 ; Home
+                             40 ;--------------------------------------------------------
+                             41 	.area _HOME
+                             42 	.area _HOME
                              43 ;--------------------------------------------------------
-                             44 	.area _CODE
-                             45 ;/sdd/PIC/z80/XideSDCC/untitled0.c:2: void main(void)
-                             46 ;	---------------------------------
-                             47 ; Function main
-                             48 ; ---------------------------------
-   0000                      49 _main_start::
-   0000                      50 _main:
-                             51 ;/sdd/PIC/z80/XideSDCC/untitled0.c:5: while (1) {
-   0000 3E 00         [ 7]   52 	ld	a,#0x00
-   0002                      53 00102$:
-                             54 ;/sdd/PIC/z80/XideSDCC/untitled0.c:6: IoPort=a++;
-   0002 D3 FF         [11]   55 	out	(_IoPort),a
-   0004 3C            [ 4]   56 	inc	a
-   0005 18 FB         [12]   57 	jr	00102$
-   0007                      58 _main_end::
-                             59 	.area _CODE
-                             60 	.area _INITIALIZER
-                             61 	.area _CABS (ABS)
+                             44 ; code
+                             45 ;--------------------------------------------------------
+                             46 	.area _CODE
+                             47 ;/sdd/PIC/z80/XideSDCC/untitled0.c:4: void main(void)
+                             48 ;	---------------------------------
+                             49 ; Function main
+                             50 ; ---------------------------------
+   0000                      51 _main_start::
+   0000                      52 _main:
+                             53 ;/sdd/PIC/z80/XideSDCC/untitled0.c:8: while (1) {
+   0000 16 00         [ 7]   54 	ld	d,#0x00
+   0002                      55 00102$:
+                             56 ;/sdd/PIC/z80/XideSDCC/untitled0.c:9: chk=a++;
+   0002 21 00 04      [10]   57 	ld	hl,#_chk + 0
+   0005 72            [ 7]   58 	ld	(hl), d
+   0006 14            [ 4]   59 	inc	d
+                             60 ;/sdd/PIC/z80/XideSDCC/untitled0.c:10: IoPort=chk;
+   0007 3A 00 04      [13]   61 	ld	a,(#_chk + 0)
+   000A D3 FF         [11]   62 	out	(_IoPort),a
+   000C 18 F4         [12]   63 	jr	00102$
+   000E                      64 _main_end::
+                             65 	.area _CODE
+                             66 	.area _INITIALIZER
+                             67 	.area _CABS (ABS)
