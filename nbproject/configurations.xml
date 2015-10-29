@@ -19,6 +19,7 @@
       <itemPath>memio_vector.c</itemPath>
       <itemPath>eadog.c</itemPath>
       <itemPath>ringbufs.c</itemPath>
+      <itemPath>sdcc_test_info</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -32,6 +33,7 @@
       <itemPath>../HP_led_display.pdf</itemPath>
       <itemPath>../z0840006-datasheet-zilog.pdf</itemPath>
       <itemPath>../1801376.pdf</itemPath>
+      <itemPath>sdcc_test_info</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
