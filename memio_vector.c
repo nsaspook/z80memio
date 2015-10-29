@@ -21,13 +21,13 @@ void InterruptHandlerHigh(void)
 		INTCONbits.INT0IF = LOW;
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
-		Z.maddr = PORTA;
+		Z.maddr = ADDR_LOW;
 		// Z.maddr += ((uint16_t) (PORTE & 0x03) << 8);
 		Z.ISRAM = A10;
 		Z.WR = ZRD;
 		Z.M1 = !ZM1;
 		Z.RFSH = !ZRFSH;
-		Z.paddr = PORTA;
+		Z.paddr = ADDR_LOW;
 		if (Z.WR) { //write to pic
 			TRISD = 0xff; // output to memory or io from Z80
 		} else {
@@ -38,10 +38,11 @@ void InterruptHandlerHigh(void)
 	 * IORQ from Z80
 	 */
 	if (INTCON3bits.INT1IF) {
+		DLED2 = HIGH;
 		INTCON3bits.INT1IF = LOW;
 		Z.IORQ = HIGH;
 		Z.RUN = TRUE;
-		Z.maddr = PORTA;
+		Z.maddr = ADDR_LOW;
 		Z.WR = ZRD;
 		if (Z.WR) { //write to pic
 			TRISD = 0xff; // output to memory or io from Z80
@@ -65,24 +66,24 @@ void InterruptHandlerHigh(void)
 		Z.RUN = FALSE;
 
 		/* slow the instruction cycle down to 1 per second */
-		INTCONbits.TMR0IF = LOW; //clear interrupt flag
-		timer.lt = TIMEROFFSET; // Copy timer value into union so we don't call a function in the ISR
-		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
-		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
-		while (!INTCONbits.TMR0IF);
+//		INTCONbits.TMR0IF = LOW; //clear interrupt flag
+//		timer.lt = TIMEROFFSET; // Copy timer value into union so we don't call a function in the ISR
+//		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
+//		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
+//		while (!INTCONbits.TMR0IF);
 
 		DLED7 = !DLED7;
 		if (Z.ISRAM) { /* RAM access */
 			if (Z.MREQ) {
 				if (Z.WR) {
-					z80_ram[Z.maddr & 0xff] = PORTD;
+					z80_ram[Z.maddr & 0xff] = ZDATA_I;
 				} else {
-					ZDATA = z80_ram[Z.maddr & 0xff];
+					ZDATA_O = z80_ram[Z.maddr & 0xff];
 				}
 			}
 		} else { /* ROM access */
 			if (Z.MREQ) {
-				ZDATA = z80_rom[Z.paddr];
+				ZDATA_O = z80_rom[Z.paddr];
 				if (Z.M1) { /* opcode */
 					/*
 					 * send the address and opcode via SPI for debug
@@ -95,6 +96,17 @@ void InterruptHandlerHigh(void)
 					b_dummy = SSP1BUF;
 				}
 			}
+			if (Z.IORQ) {
+					/*
+					 * send the port and data via SPI for debug
+					 */
+					SSP1BUF = Z.maddr;
+					while (!SSP1STATbits.BF);
+					b_dummy = SSP1BUF;
+					SSP1BUF = ZDATA_I;
+					while (!SSP1STATbits.BF);
+					b_dummy = SSP1BUF;
+			}
 		}
 
 		/*
@@ -103,7 +115,7 @@ void InterruptHandlerHigh(void)
 		 * Too LONG or SHORT will cause misreads of data
 		 * 11 to 13 nop opcodes seems to work
 		 */
-		DLED2 = HIGH;
+
 		WAIT = HIGH; /* clear the wait signal so the Z80 can process the data */
 		Nop();
 		Nop();
