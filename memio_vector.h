@@ -61,6 +61,9 @@ extern "C" {
 	/* display chip select pin */
 #define EDCS		LATCbits.LATC7	
 #define EDRS		LATBbits.LATB3
+	
+	/* spare */
+#define SPARE1		LATCbits.LATC6
 
 #ifdef INTTYPES
 #include <stdint.h>
