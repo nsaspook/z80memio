@@ -28,7 +28,7 @@ extern "C" {
 #include "memio_vector.h"
 
 #define LCD_CMD_MASK	0x01
-#define LCD_CMD_SET		0x100
+#define LCD_CMD_SET	0x100
 #define LCD_CLEAR_HOME	0x04
 
 #define EADOGM_CMD_CLR		1
