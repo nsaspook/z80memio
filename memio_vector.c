@@ -1,5 +1,6 @@
 
 #include "memio_vector.h"
+#include <spi.h>
 
 /* High priority interrupt routine
  * handles the signal and data requests from the Z80
@@ -63,12 +64,15 @@ void InterruptHandlerHigh(void)
 	 */
 	if (Z.RUN) {
 		Z.RUN = FALSE;
+
+#ifdef SLOW_STEP
 		/* slow the instruction cycle down to ~1 per second */
 		INTCONbits.TMR0IF = LOW; //clear interrupt flag
 		timer.lt = Z80_STEP; // Copy timer value into union so we don't call a function in the ISR
 		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
 		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
 		while (!INTCONbits.TMR0IF);
+#endif	
 
 		DLED7 = !DLED7;
 		if (Z.ISRAM) { /* RAM access */
@@ -87,6 +91,8 @@ void InterruptHandlerHigh(void)
 					/*
 					 * send the address and opcode via SPI for debug
 					 */
+					SSPCON1bits.SSPM = SPI_FOSC_4; // set clock to high speed
+					EDCS=HIGH;
 					SSP1BUF = Z.paddr;
 					while (!SSP1STATbits.BF);
 					b_dummy = SSP1BUF;
@@ -100,9 +106,13 @@ void InterruptHandlerHigh(void)
 					/*
 					 * send the port and data via SPI for debug
 					 */
+					SSPCON1bits.SSPM = SPI_FOSC_4; // set clock to high speed
+					EDCS=HIGH;
 					SSP1BUF = Z.maddr;
 					while (!SSP1STATbits.BF);
 					b_dummy = SSP1BUF;
+					SSPCON1bits.SSPM = SPI_FOSC_64; // set clock to slow speed
+					EDCS=LOW;
 					SSP1BUF = ZDATA_I;
 					while (!SSP1STATbits.BF);
 					b_dummy = SSP1BUF;
