@@ -20,6 +20,7 @@ extern "C" {
 	
 #define DEBUG_MEM	FALSE
 #define DEBUG_IO	TRUE
+//#define SLOW_STEP
 
 #define	TIMEROFFSET	32000			// timer0 16bit counter value for ~1 second to overflow
 #define Z80_STEP	56000
@@ -56,6 +57,10 @@ extern "C" {
 	/* debug pins */
 #define DLED2		LATCbits.LATC2
 #define DLED7		LATCbits.LATC7
+	
+	/* display chip select pin */
+#define EDCS		LATCbits.LATC7	
+#define EDRS		LATBbits.LATB3
 
 #ifdef INTTYPES
 #include <stdint.h>
