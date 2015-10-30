@@ -12,7 +12,7 @@
  * S BUSREQ_, C INT_, D NMI
  * 
  * debug port pins
- * 1 wait, 2 gmreq, 3 dled2, 4 mreq, 5 rfsh, 6 sck, 7 sdo
+ * 1 wait, 2 gmreq, 3 dled2, 4 mreq, 5 rfsh, 6 sck, 7 sdo, 8 m1
  */
 
 #define P46K22
