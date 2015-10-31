@@ -92,7 +92,7 @@ void InterruptHandlerHigh(void)
 					 * send the address and opcode via SPI for debug
 					 */
 					SSPCON1bits.SSPM = SPI_FOSC_4; // set clock to high speed
-					EDCS=HIGH;
+					EDCS = HIGH;
 					SSP1BUF = Z.paddr;
 					while (!SSP1STATbits.BF);
 					b_dummy = SSP1BUF;
@@ -107,15 +107,25 @@ void InterruptHandlerHigh(void)
 					 * send the port and data via SPI for debug
 					 */
 					SSPCON1bits.SSPM = SPI_FOSC_4; // set clock to high speed
-					EDCS=HIGH;
+					EDCS = HIGH;
 					SSP1BUF = Z.maddr;
 					while (!SSP1STATbits.BF);
 					b_dummy = SSP1BUF;
-					SSPCON1bits.SSPM = SPI_FOSC_64; // set clock to slow speed
-					EDCS=LOW;
+				}
+				/*
+				 * Z80 IO port address space
+				 */
+				switch (Z.maddr & 0xff) {
+				case 0x01:
+					SPARE1 = ZDATA_I;
+					break;
+				default:
+					SSPCON1bits.SSPM = SPI_FOSC_16; // set clock to slower speed
+					EDCS = LOW;
 					SSP1BUF = ZDATA_I;
 					while (!SSP1STATbits.BF);
 					b_dummy = SSP1BUF;
+					break;
 				}
 			}
 		}
