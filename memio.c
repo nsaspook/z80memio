@@ -98,24 +98,30 @@ uint8_t volatile z80_ram[256];
 
 /* short test program of opcodes, memory and io using the SDCC -mz80 compiler
 
-__sfr __at 0x80 IoPort;
-volatile __at (0x0400) unsigned char ram_space;
-static const char __at 0x00d0 z80_text[]=" All work and no play makes Jack a dull boy ";
+// setup the IO ports to send data
+__sfr __at 0x80 IoPort_data; // send display data text
+__sfr __at 0x81 IoPort_cmd; // send commands to program the display
+__sfr __at 0x01 IoPort_bit; // set or clear bit RC6 on the PIC
+
+volatile __at(0x0400) unsigned char ram_space;
+
+static const char __at 0x00d0 z80_text[] = " All work and no play makes Jack a dull boy ";
 //static const char __at 0x00d0 z80_text[]=" Shall we play a game? ";
 
 void main(void)
 {
-unsigned char i=0, *ram_ptr=&ram_space;
-unsigned int a;
+	unsigned char c, i = 0, *ram_ptr = &ram_space;
+	unsigned int a;
 
-while (1) {
-    for (i=0;i<80;i++) {
-        if (z80_text[i]==0) break;
-        IoPort=z80_text[i];
-        a=0;
-        while (a++ < 1024);
-        }
-    };
+	while (1) {
+		for (i = 0; i < 80; i++) {
+			c = z80_text[i];
+			if (!c) break;
+			IoPort_data = c;
+			a = 0;
+			while (a++ < 1024);
+		}
+	};
 }
  
  * rom data created using the make_c_header script in the XideSDCC directory
