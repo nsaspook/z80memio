@@ -64,6 +64,11 @@ extern "C" {
 	
 	/* spare */
 #define SPARE1		LATCbits.LATC6
+	
+	/* IO address */
+#define SPI_DATA	0x80
+#define SPI_CMD		0x81
+#define PORT_BIT	0x01
 
 #ifdef INTTYPES
 #include <stdint.h>
