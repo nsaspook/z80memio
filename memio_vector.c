@@ -115,16 +115,28 @@ void InterruptHandlerHigh(void)
 				/*
 				 * Z80 IO port address space
 				 */
-				switch (Z.maddr & 0xff) {
-				case 0x01:
+
+				switch (Z.maddr) {
+				case PORT_BIT:
 					SPARE1 = ZDATA_I;
 					break;
-				default:
+				case SPI_DATA:
 					SSPCON1bits.SSPM = SPI_FOSC_16; // set clock to slower speed
+					EDRS = HIGH;
 					EDCS = LOW;
 					SSP1BUF = ZDATA_I;
 					while (!SSP1STATbits.BF);
 					b_dummy = SSP1BUF;
+					break;
+				case SPI_CMD:
+					SSPCON1bits.SSPM = SPI_FOSC_16; // set clock to slower speed
+					EDRS = LOW;
+					EDCS = LOW;
+					SSP1BUF = ZDATA_I;
+					while (!SSP1STATbits.BF);
+					b_dummy = SSP1BUF;
+					break;
+				default:
 					break;
 				}
 			}
