@@ -64,11 +64,10 @@
 
 /*
  *
- *			E0.20	RGBA LED PWM color mixer CTMU touch driver
+ *			CTMU touch driver
  *			***		background I/O using timer0/timer2 and adc interrupts
  *			Timer3 counter/buffer used for ATOMIC 16bit reads and writes of touch data
  * PORTA		AN0 touch input, AN2 DAC output
- * PORTB		4LED RGBA bar display
  *
  *
  *
@@ -126,16 +125,8 @@ void low_handler(void); // led pwm isr
 #define	RNG_SPEED_F	12
 #define	RNG_SPEED_S	10
 #define	MAX_UP	255
-#define PUF_SIZE 64
-#define LEDA	LATBbits.LATB5
-#define LEDR	LATBbits.LATB4
-#define LEDG	LATBbits.LATB7
-#define LEDB	LATBbits.LATB6
-#define	LEDBLK	LATB
+#define PUF_SIZE 128
 #define	PDELAY	9999
-
-#define ALLON	0xff
-#define ALLOFF	0x00
 
 //	CTMU section
 unsigned int touch_base_calc(unsigned char);
@@ -161,7 +152,7 @@ int ctmu_setup(unsigned char, unsigned char);
 #define SPI_CMD_RW		0b11110000
 
 //	Random number generator section
-#pragma udata sddata
+#pragma udata rnddata
 far unsigned char sram_key[PUF_SIZE], sram_key_masked[PUF_SIZE];
 #pragma udata
 
@@ -175,12 +166,6 @@ struct spi_link_io_type { // internal SPI link state table
 };
 
 volatile struct spi_link_io_type S;
-
-struct colortype {
-	unsigned char rval, gval, bval, aval;
-};
-volatile struct colortype col = {15, 15, 15, 15};
-int PWM_cycle(struct colortype*, char);
 
 struct btype {
 	unsigned int seed, sram_raw, eeprom_save, eeprom_mask, eeprom_key;
@@ -252,23 +237,9 @@ void low_int(void)
 
 void low_handler(void)
 {
-	static unsigned char a = 0;
 	if (PIR1bits.TMR2IF) {
 		PIR1bits.TMR2IF = 0; // clear TMR2 int flag
 		WriteTimer2(PDELAY);
-		a++;
-		if (a == 0) {
-			LEDBLK = ALLON;
-			if (col.aval > MAXA) col.aval = MAXA;
-			if (col.rval > MAXR) col.rval = MAXR;
-			if (col.gval > MAXG) col.rval = MAXG;
-			if (col.bval > MAXB) col.bval = MAXB;
-		} else {
-			if (a >= col.aval) LEDA = OFF;
-			if (a >= col.rval) LEDR = OFF;
-			if (a >= col.gval) LEDG = OFF;
-			if (a >= col.bval) LEDB = OFF;
-		}
 	}
 }
 
@@ -478,26 +449,6 @@ unsigned int ctmu_touch(unsigned char channel, unsigned char NULL0)
 	}
 }
 
-void color_check(void)
-{
-	long int delay;
-
-	LEDBLK = ALLOFF;
-	for (delay = 0; delay <= 50000; delay++) ClrWdt(); // reset the WDT timer
-	LEDA = ON;
-	for (delay = 0; delay <= 50000; delay++) ClrWdt(); // reset the WDT timer
-	LEDA = OFF;
-	LEDR = ON;
-	for (delay = 0; delay <= 50000; delay++) ClrWdt(); // reset the WDT timer
-	LEDR = OFF;
-	LEDG = ON;
-	for (delay = 0; delay <= 50000; delay++) ClrWdt(); // reset the WDT timer
-	LEDG = OFF;
-	LEDB = ON;
-	for (delay = 0; delay <= 50000; delay++) ClrWdt(); // reset the WDT timer
-	LEDB = OFF;
-}
-
 /*	Count bits 	*/
 
 unsigned char bit_count(unsigned char input)
@@ -537,7 +488,7 @@ unsigned int Make_Crc16(unsigned char *data, unsigned int length)
 unsigned int puf_sram(unsigned char cmode, unsigned char kmode) // look at random SRAM data for PRNG seeds and ID key
 { // uses a udata section of memeory 2xPUF_SIZE and eeprom from
 	unsigned int e; // 0 to 3xPUF_SIZE+sizeof(puf_bits) to store key, diff data, masked data and seed data in EEPROM
-	static unsigned int seeda = 0, seedk = 0; // if cmode is TRUE the stored key diff data will be zeroed and will return 0
+	static unsigned int seeda = 0; // if cmode is TRUE the stored key diff data will be zeroed and will return 0
 	unsigned char entr_s, entr_r, entr_d, *seedp; // if kmode is TRUE the seed will be generated from the masked contents of sram
 	// if kmode is FALSE the seed will be generated from the raw sram contents
 	// kmode should be stable after about 10 or more power cycles
@@ -575,7 +526,6 @@ unsigned int puf_sram(unsigned char cmode, unsigned char kmode) // look at rando
 			Busy_eep();
 			Write_b_eep(e + PUF_SIZE + PUF_SIZE, 0); // write zeros to  eeprom key masked data
 		}
-		ClrWdt(); // reset the WDT timer
 	}
 
 	puf_bits.seed = Make_Crc16(sram_key, PUF_SIZE); // make seed from crc16 of sram
@@ -590,22 +540,9 @@ unsigned int puf_sram(unsigned char cmode, unsigned char kmode) // look at rando
 	return(puf_bits.seed);
 }
 
-unsigned char get_vspeed(void)
-{
-	if ((unsigned int) rand() > 16000) {
-		return RNG_SPEED_F;
-	} else {
-		return RNG_SPEED_S;
-	}
-}
-
 void main(void)
 {
-	unsigned int delayc = 0, spinner = 0, dc0 = 256, dc1 = 256, dc2 = 256, dc3 = 256;
-	unsigned int s0 = 50, s1 = 50, s2 = 50, s3 = 50, sc0 = 0, sc1 = 0, sc2 = 0, sc3 = 0, touch_tmp,
-		RUP = TRUE, GUP = TRUE, BUP = TRUE, AUP = TRUE;
-	unsigned int touch_zero, touch1, touch_avg, i = 0, recal = 0;
-	unsigned long delay;
+	unsigned int touch_zero, touch_tmp;
 	TRISA = 0xff; //	inputs 
 	TRISB = 0x00; //	outputs
 	TRISC = 0x00; //	outputs
@@ -644,16 +581,6 @@ void main(void)
 
 	srand(puf_sram(FALSE, FALSE)); // use unmasked seed for prng
 
-	col.rval = rand();
-	col.gval = rand();
-	col.bval = rand();
-	col.aval = rand();
-
-	LEDA = OFF;
-	LEDR = OFF;
-	LEDG = OFF;
-	LEDB = OFF;
-	color_check();
 	/* Enable all low priority interrupts */
 	INTCONbits.GIEL = 1;
 
@@ -664,81 +591,9 @@ void main(void)
 
 	/* Loop forever */
 	while (TRUE) { // cycle colors at random speeds
-
-		if (sc0++ >= s0) {
-			if (AUP) { // count pwm duty-cycle up
-				col.aval++;
-				if (col.aval >= MAX_UP) AUP = FALSE; //	at max count reverse count
-			} else { // count pwm duty-cycle down
-				col.aval--;
-				if (col.aval <= 1) AUP = TRUE; //	at min count reverse count
-			}
-			sc0 = 0; // reset change rate counter clock
-			if (dc0++ >RNG_UPDATE) { // check update rate counter
-				dc0 = 0; // reset update rate
-				s0 = (unsigned int) ((unsigned int) rand() >> get_vspeed()); // set new change rate counter
-			}
-		}
-
-		if (sc1++ >= s1) {
-			if (RUP) {
-				col.rval++;
-				if (col.rval >= MAX_UP) RUP = FALSE;
-			} else {
-				col.rval--;
-				if (col.rval <= 1) RUP = TRUE;
-			}
-			sc1 = 0;
-			if (dc1++ >RNG_UPDATE) {
-				dc1 = 0;
-				s1 = (unsigned int) ((unsigned int) rand() >> get_vspeed());
-			}
-		}
-
-		if (sc2++ >= s2) {
-			if (GUP) {
-				col.gval++;
-				if (col.gval >= MAX_UP) GUP = FALSE;
-			} else {
-				col.gval--;
-				if (col.gval <= 1) GUP = TRUE;
-			}
-			sc2 = 0;
-			if (dc2++ >RNG_UPDATE) {
-				dc2 = 0;
-				s2 = (unsigned int) ((unsigned int) rand() >> get_vspeed());
-			}
-		}
-
-		if (sc3++ >= s3) {
-			if (BUP) {
-				col.bval++;
-				if (col.bval >= MAX_UP) BUP = FALSE;
-			} else {
-				col.bval--;
-				if (col.bval <= 1) BUP = TRUE;
-			}
-			sc3 = 0;
-			if (dc3++ >RNG_UPDATE) {
-				dc3 = 0;
-				s3 = (unsigned int) ((unsigned int) rand() >> get_vspeed());
-			}
-		}
-
 		CTMU_ADC_UPDATED = FALSE;
 		while (!CTMU_ADC_UPDATED) ClrWdt(); // wait for touch update cycle
 		touch_tmp = ctmu_touch(ctmu_button, TRUE);
-		if (touch_tmp > 3) {
-			MAXA = MAXR = MAXG = MAXB = touch_tmp * 4;
-		}
-		if (FALSE && switchState == PRESSED) {
-			col.rval = rand();
-			col.gval = rand();
-			col.bval = rand();
-			col.aval = rand();
-			MAXA = MAXR = MAXG = MAXB = 255;
-		}
-		ClrWdt(); // reset the WDT timer
 	}
 	ClosePWM5();
 }
