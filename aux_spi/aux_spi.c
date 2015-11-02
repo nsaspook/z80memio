@@ -473,14 +473,11 @@ unsigned int Make_Crc16(unsigned char *data, unsigned int length)
 	accum = 0xFFFF;
 	len = length;
 
-
-	ClrWdt(); // reset the WDT timer
 	while (len--) {
 		accum = ((accum & 0x00FF) << 8) ^
 			crc_table[((accum >> 8) ^ *data++) & 0x00FF];
 	}
 
-	ClrWdt(); // reset the WDT timer
 	return(accum);
 }
 
@@ -543,6 +540,7 @@ unsigned int puf_sram(unsigned char cmode, unsigned char kmode) // look at rando
 void main(void)
 {
 	unsigned int touch_zero, touch_tmp;
+	
 	TRISA = 0xff; //	inputs 
 	TRISB = 0x00; //	outputs
 	TRISC = 0x00; //	outputs
@@ -554,7 +552,6 @@ void main(void)
 	OpenTimer0(TIMER_INT_ON & T0_16BIT & T0_SOURCE_INT & T0_PS_1_1);
 	WriteTimer0(TIMERDISCHARGE); //	start timer0 
 
-	OpenPWM5(0x10, CCP_5_SEL_TMR12);
 	OpenTimer2(TIMER_INT_ON & T2_PS_1_1 & T2_POST_1_8);
 	IPR1bits.TMR2IP = 0; // set timer2 low pri interrupt
 	WriteTimer2(PDELAY);
@@ -595,6 +592,5 @@ void main(void)
 		while (!CTMU_ADC_UPDATED) ClrWdt(); // wait for touch update cycle
 		touch_tmp = ctmu_touch(ctmu_button, TRUE);
 	}
-	ClosePWM5();
 }
 #pragma idata
