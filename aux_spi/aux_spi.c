@@ -544,6 +544,8 @@ void main(void)
 	TRISA = 0xff; // inputs default analog
 	ANSELAbits.ANSA5 = 0; // digital input
 	TRISB = 0xff; // outputs default digital per config pragma
+	WPUB = 0xff;
+	INTCON2bits.RBPU = LOW; // turn on weak pullups
 	TRISC = 0x00; // outputs
 	ANSELC = 0; // all digital
 	LATC = 0xff;
