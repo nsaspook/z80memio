@@ -1,5 +1,3 @@
-// PIC18F25K22 Configuration Bit Settings
-
 // 'C' source line config statements
 
 #include <p18f25k22.h>
@@ -64,8 +62,6 @@
 // CONFIG7H
 #pragma config EBTRB = OFF      // Boot Block Table Read Protection bit (Boot Block (000000-0007FFh) not protected from table reads executed in other blocks)
 
-
-
 /*
  *
  *			E0.20	RGBA LED PWM color mixer CTMU touch driver
@@ -88,6 +84,40 @@
 #include <timers.h>
 #include <adc.h>
 #include <ctmu.h>
+#include <spi.h>
+#include <GenericTypeDefs.h>
+
+/* general DIO defines */
+#define LOW		(unsigned char)0        // digital output state levels, sink
+#define	HIGH            (unsigned char)1        // digital output state levels, source
+#define	ON		LOW       		//
+#define OFF		HIGH			//
+#define	S_ON            LOW       		// low select/on for chip/led
+#define S_OFF           HIGH			// high deselect/off chip/led
+#define	R_ON            HIGH       		// control relay states, relay is on when output gate is high, uln2803,omron relays need the CPU at 5.5vdc to drive
+#define R_OFF           LOW			// control relay states
+#define R_ALL_OFF       0x00
+#define R_ALL_ON	0xff
+#define NO		LOW
+#define YES		HIGH
+#define IN		HIGH
+#define OUT		LOW
+
+#ifdef INTTYPES
+#include <stdint.h>
+#else
+#define INTTYPES
+/*unsigned types*/
+typedef unsigned char uint8_t;
+typedef unsigned int uint16_t;
+typedef unsigned long uint32_t;
+typedef unsigned long long uint64_t;
+/*signed types*/
+typedef signed char int8_t;
+typedef signed int int16_t;
+typedef signed long int32_t;
+typedef signed long long int64_t;
+#endif
 
 void high_handler(void); //reads the CTMU voltage using a ADC channel, interrupt driven
 void low_handler(void); // led pwm isr
@@ -104,11 +134,7 @@ void low_handler(void); // led pwm isr
 #define	LEDBLK	LATB
 #define	PDELAY	9999
 
-#define FALSE	0
-#define TRUE	1
-#define	ON		1
 #define ALLON	0xff
-#define	OFF		0
 #define ALLOFF	0x00
 
 //	CTMU section
@@ -130,7 +156,9 @@ int ctmu_setup(unsigned char, unsigned char);
 //from pressed to un-pressed
 #define PRESSED 1
 #define UNPRESSED 0
-#define	CHOP_BITS	1						// remove this many bits to reduce noise from the touch sensor
+#define	CHOP_BITS	1				// remove this many bits to reduce noise from the touch sensor
+
+#define SPI_CMD_RW		0b11110000
 
 //	Random number generator section
 #pragma udata sddata
@@ -138,6 +166,15 @@ far unsigned char sram_key[PUF_SIZE], sram_key_masked[PUF_SIZE];
 #pragma udata
 
 #pragma	idata
+
+struct spi_link_io_type { // internal SPI link state table
+	uint8_t link : 1;
+	uint8_t frame : 1;
+	uint8_t timeout, seq, config;
+	int32_t int_count;
+};
+
+volatile struct spi_link_io_type S;
 
 struct colortype {
 	unsigned char rval, gval, bval, aval;
@@ -240,7 +277,7 @@ void low_handler(void)
 void high_handler(void)
 {
 	static union Timers timer;
-	static unsigned char channel, i = 0;
+	static unsigned char channel, i = 0, data_in2 = 0;
 	static unsigned int touch_peak = 1024; // max CTMU voltage
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 
@@ -287,6 +324,41 @@ void high_handler(void)
 		CTMUCONLbits.EDG2STAT = 0;
 		CTMUCONHbits.IDISSEN = 1; // drain charge on the circuit
 		WriteTimer0(TIMERDISCHARGE); // set timer to discharge rate
+	}
+
+	if (PIR1bits.SSPIF) { // SPI port SLAVE receiver
+		S.link = TRUE;
+		S.timeout = 3;
+		PIR1bits.SSPIF = LOW;
+		data_in2 = SSPBUF; // read the buffer quickly
+		LATBbits.LATB2 = !LATBbits.LATB2;
+
+		/*
+		 * We are processing the Master CMD request
+		 */
+		if (S.frame) {
+			switch (S.seq) {
+			case 0:
+
+				break;
+			case 1:
+
+			default:
+
+				S.frame = FALSE;
+				break;
+			}
+			S.seq++;
+		}
+
+		/*
+		 * The master has sent a data RW command
+		 */
+		if (data_in2 == SPI_CMD_RW && !S.frame) {
+			S.frame = TRUE; // set the inprogress flag
+			S.seq = 0;
+			SSPBUF = 0; // load the buffer for the next master byte
+		}
 	}
 }
 
@@ -379,30 +451,28 @@ int ctmu_setup(unsigned char current, unsigned char channel)
 	return 0;
 }
 
-unsigned int ctmu_touch(unsigned char channel, unsigned char NULL)
+unsigned int ctmu_touch(unsigned char channel, unsigned char NULL0)
 {
 	static unsigned int ctmu_change = 0, last = 0, null = 0;
 	static union Timers timer;
 
 	if (CTMU_ADC_UPDATED) {
-		timer.bt[0] = TMR3L; // read low byte and read 16bits from timer counter into TMR3 16bit buffer
-		timer.bt[1] = TMR3H; // read high byte
-		if (!NULL) {
+		timer.bt[0] = TMR3L; // read low byte and read 16bits from timer counter into TMR3 16bit buffer 
+		timer.bt[1] = TMR3H; // read high byte 
+		if (!NULL0) {
 			return(timer.lt & 0x03ff);
 		}
 		if (((timer.lt & 0x03ff))< (touch_base[channel]&0x03ff)) {
-			ctmu_change = (touch_base[channel]&0x03ff)-(timer.lt & 0x03ff); // read diff 
-			if (NULL) {
+			ctmu_change = (touch_base[channel]&0x03ff)-(timer.lt & 0x03ff); // read diff  
+			if (NULL0) {
 				if (ctmu_change > 255) ctmu_change = 1;
 			}
 		}
-		//		LATD= ~ctmu_change;
 		LATC = ~ctmu_change;
-		if ((null == 0) && NULL) null = ctmu_change;
+		if ((null == 0) && NULL0) null = ctmu_change;
 		last = ctmu_change;
 		return(unsigned int) ctmu_change;
 	} else {
-		//		LATD= ~last;
 		LATC = ~last;
 		return(unsigned int) last;
 	}
@@ -539,10 +609,7 @@ void main(void)
 	TRISA = 0xff; //	inputs 
 	TRISB = 0x00; //	outputs
 	TRISC = 0x00; //	outputs
-	//		TRISD = 0x00;				// led display
-	TRISE = 0x00; // all outputs
 	LATC = 0xff;
-	//		LATD=0x00;					// all on
 	OSCCON = 0x72; // internal osc
 	OSCTUNE = 0xC0;
 	SLRCON = 0x00; // slew rate to max
@@ -556,6 +623,18 @@ void main(void)
 	WriteTimer2(PDELAY);
 
 	TRISAbits.TRISA2 = 0; // DAC output
+
+	/* SPI pins setup */
+	TRISAbits.TRISA5 = IN; // SS
+	TRISCbits.TRISC3 = IN; // SCK 
+	TRISCbits.TRISC4 = IN; // SDI
+	TRISCbits.TRISC5 = OUT; // SDO
+
+
+	/* setup the SPI interface */
+	OpenSPI(SLV_SSON, MODE_00, SMPMID); // Must be SMPMID in slave mode
+	/* clear SPI module possible flag */
+	PIR1bits.SSPIF = LOW;
 
 	/* Enable interrupt priority */
 	RCONbits.IPEN = 1;
@@ -646,9 +725,6 @@ void main(void)
 			}
 		}
 
-		//				for (delay=0;delay<=255;delay++) {
-		//					ClrWdt();	// reset the WDT timer
-		//				}
 		CTMU_ADC_UPDATED = FALSE;
 		while (!CTMU_ADC_UPDATED) ClrWdt(); // wait for touch update cycle
 		touch_tmp = ctmu_touch(ctmu_button, TRUE);
