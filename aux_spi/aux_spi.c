@@ -540,10 +540,12 @@ unsigned int puf_sram(unsigned char cmode, unsigned char kmode) // look at rando
 void main(void)
 {
 	unsigned int touch_zero, touch_tmp;
-	
-	TRISA = 0xff; //	inputs 
-	TRISB = 0x00; //	outputs
-	TRISC = 0x00; //	outputs
+
+	TRISA = 0xff; // inputs default analog
+	ANSELAbits.ANSA5 = 0; // digital input
+	TRISB = 0xff; // outputs default digital per config pragma
+	TRISC = 0x00; // outputs
+	ANSELC = 0; // all digital
 	LATC = 0xff;
 	OSCCON = 0x72; // internal osc
 	OSCTUNE = 0xC0;
@@ -556,6 +558,9 @@ void main(void)
 	IPR1bits.TMR2IP = 0; // set timer2 low pri interrupt
 	WriteTimer2(PDELAY);
 
+	VREFCON0 = 0b11010000;
+	VREFCON1 = 0b11100000;
+	VREFCON2 = 0b00010000;
 	TRISAbits.TRISA2 = 0; // DAC output
 
 	/* SPI pins setup */
