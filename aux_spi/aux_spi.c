@@ -255,7 +255,7 @@ void high_handler(void)
 	static unsigned char channel, i = 0, data_in2 = 0;
 	static unsigned int touch_peak = 1024; // max CTMU voltage
 
-	DLED7 = !DLED7;
+//	DLED7 = !DLED7;
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 
 		if (!CTMUCONHbits.IDISSEN) { // charge cycle timer0 int, because not shorting the CTMU voltage.
@@ -304,7 +304,7 @@ void high_handler(void)
 	}
 
 	if (PIR1bits.SSPIF) { // SPI port SLAVE receiver
-		DLED2 = !DLED2;
+		DLED7 = !DLED7;
 		S.link = TRUE;
 		S.timeout = 3;
 		PIR1bits.SSPIF = LOW;
