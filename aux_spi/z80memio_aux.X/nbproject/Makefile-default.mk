@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=/sdd/PIC/z80memio/aux_spi/aux_spi.c
+SOURCEFILES_QUOTED_IF_SPACED=../aux_spi.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/2146502459/aux_spi.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/2146502459/aux_spi.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/1472/aux_spi.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/1472/aux_spi.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/_ext/2146502459/aux_spi.o
+OBJECTFILES=${OBJECTDIR}/_ext/1472/aux_spi.o
 
 # Source Files
-SOURCEFILES=/sdd/PIC/z80memio/aux_spi/aux_spi.c
+SOURCEFILES=../aux_spi.c
 
 
 CFLAGS=
@@ -89,35 +89,35 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/_ext/2146502459/aux_spi.o: /sdd/PIC/z80memio/aux_spi/aux_spi.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/_ext/2146502459" 
-	@${RM} ${OBJECTDIR}/_ext/2146502459/aux_spi.o.d 
-	@${RM} ${OBJECTDIR}/_ext/2146502459/aux_spi.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -ml --extended -I ${MP_CC_DIR}/../h  -fo ${OBJECTDIR}/_ext/2146502459/aux_spi.o   /sdd/PIC/z80memio/aux_spi/aux_spi.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/2146502459/aux_spi.o 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/2146502459/aux_spi.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
+${OBJECTDIR}/_ext/1472/aux_spi.o: ../aux_spi.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/_ext/1472" 
+	@${RM} ${OBJECTDIR}/_ext/1472/aux_spi.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1472/aux_spi.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -ml --extended -I ${MP_CC_DIR}/../h  -fo ${OBJECTDIR}/_ext/1472/aux_spi.o   ../aux_spi.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/aux_spi.o 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1472/aux_spi.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 else
-${OBJECTDIR}/_ext/2146502459/aux_spi.o: /sdd/PIC/z80memio/aux_spi/aux_spi.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/_ext/2146502459" 
-	@${RM} ${OBJECTDIR}/_ext/2146502459/aux_spi.o.d 
-	@${RM} ${OBJECTDIR}/_ext/2146502459/aux_spi.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -ml --extended -I ${MP_CC_DIR}/../h  -fo ${OBJECTDIR}/_ext/2146502459/aux_spi.o   /sdd/PIC/z80memio/aux_spi/aux_spi.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/2146502459/aux_spi.o 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/2146502459/aux_spi.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
+${OBJECTDIR}/_ext/1472/aux_spi.o: ../aux_spi.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/_ext/1472" 
+	@${RM} ${OBJECTDIR}/_ext/1472/aux_spi.o.d 
+	@${RM} ${OBJECTDIR}/_ext/1472/aux_spi.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -ml --extended -I ${MP_CC_DIR}/../h  -fo ${OBJECTDIR}/_ext/1472/aux_spi.o   ../aux_spi.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/1472/aux_spi.o 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1472/aux_spi.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 endif
 
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: link
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-dist/${CND_CONF}/${IMAGE_TYPE}/z80memio_aux.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    /sdd/PIC/z80memio/aux_spi/18f25k22_g.lkr
+dist/${CND_CONF}/${IMAGE_TYPE}/z80memio_aux.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    ../18f25k22_g.lkr
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD} $(MP_EXTRA_LD_PRE) "/sdd/PIC/z80memio/aux_spi/18f25k22_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -m"${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map" -u_EXTENDEDMODE -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 -z__MPLAB_DEBUGGER_ICD3=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}/../lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/z80memio_aux.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
+	${MP_LD} $(MP_EXTRA_LD_PRE) "../18f25k22_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -m"${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map" -u_EXTENDEDMODE -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 -z__MPLAB_DEBUGGER_ICD3=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}/../lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/z80memio_aux.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 else
-dist/${CND_CONF}/${IMAGE_TYPE}/z80memio_aux.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   /sdd/PIC/z80memio/aux_spi/18f25k22_g.lkr
+dist/${CND_CONF}/${IMAGE_TYPE}/z80memio_aux.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   ../18f25k22_g.lkr
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD} $(MP_EXTRA_LD_PRE) "/sdd/PIC/z80memio/aux_spi/18f25k22_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -m"${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map" -u_EXTENDEDMODE -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}/../lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/z80memio_aux.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
+	${MP_LD} $(MP_EXTRA_LD_PRE) "../18f25k22_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -m"${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map" -u_EXTENDEDMODE -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}/../lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/z80memio_aux.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 endif
 
 

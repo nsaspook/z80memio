@@ -1,0 +1,122 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.5.4	//
+!_TAG_REVISION_NAME	MCHPTags	//
+!_TAG_REVISION_VERSION	6.0.1	//
+CHOP_BITS::1	X:\Z80\z80memio\aux_spi\aux_spi.c	150;"	d	line:150	file:
+CTMU_ADC_UPDATED	X:\Z80\z80memio\aux_spi\aux_spi.c	176;"	v	line:176
+CTMU_WORKING	X:\Z80\z80memio\aux_spi\aux_spi.c	176;"	v	line:176
+HIGH::(unsignedchar)1	X:\Z80\z80memio\aux_spi\aux_spi.c	91;"	d	line:91	file:
+HYST::8	X:\Z80\z80memio\aux_spi\aux_spi.c	146;"	d	line:146	file:
+IN::HIGH	X:\Z80\z80memio\aux_spi\aux_spi.c	102;"	d	line:102	file:
+INTTYPES	X:\Z80\z80memio\aux_spi\aux_spi.c	108;"	d	line:108	file:
+LOW::(unsignedchar)0	X:\Z80\z80memio\aux_spi\aux_spi.c	90;"	d	line:90	file:
+MAXA	X:\Z80\z80memio\aux_spi\aux_spi.c	175;"	v	line:175
+MAXB	X:\Z80\z80memio\aux_spi\aux_spi.c	175;"	v	line:175
+MAXG	X:\Z80\z80memio\aux_spi\aux_spi.c	175;"	v	line:175
+MAXR	X:\Z80\z80memio\aux_spi\aux_spi.c	175;"	v	line:175
+MAX_UP::255	X:\Z80\z80memio\aux_spi\aux_spi.c	127;"	d	line:127	file:
+Make_Crc16	X:\Z80\z80memio\aux_spi\aux_spi.c	468;"	f	line:468	signature:(unsigned char *data, unsigned int length)
+NO::LOW	X:\Z80\z80memio\aux_spi\aux_spi.c	100;"	d	line:100	file:
+OFF::HIGH	X:\Z80\z80memio\aux_spi\aux_spi.c	93;"	d	line:93	file:
+ON::LOW	X:\Z80\z80memio\aux_spi\aux_spi.c	92;"	d	line:92	file:
+OUT::LOW	X:\Z80\z80memio\aux_spi\aux_spi.c	103;"	d	line:103	file:
+PDELAY::9999	X:\Z80\z80memio\aux_spi\aux_spi.c	129;"	d	line:129	file:
+PEAK_READS	X:\Z80\z80memio\aux_spi\aux_spi.c	175;"	v	line:175
+PRESSED::1	X:\Z80\z80memio\aux_spi\aux_spi.c	148;"	d	line:148	file:
+PUF_SIZE::128	X:\Z80\z80memio\aux_spi\aux_spi.c	128;"	d	line:128	file:
+RNG_SPEED_F::12	X:\Z80\z80memio\aux_spi\aux_spi.c	125;"	d	line:125	file:
+RNG_SPEED_S::10	X:\Z80\z80memio\aux_spi\aux_spi.c	126;"	d	line:126	file:
+RNG_UPDATE::128	X:\Z80\z80memio\aux_spi\aux_spi.c	124;"	d	line:124	file:
+R_ALL_OFF::0x00	X:\Z80\z80memio\aux_spi\aux_spi.c	98;"	d	line:98	file:
+R_ALL_ON::0xff	X:\Z80\z80memio\aux_spi\aux_spi.c	99;"	d	line:99	file:
+R_OFF::LOW	X:\Z80\z80memio\aux_spi\aux_spi.c	97;"	d	line:97	file:
+R_ON::HIGH	X:\Z80\z80memio\aux_spi\aux_spi.c	96;"	d	line:96	file:
+S	X:\Z80\z80memio\aux_spi\aux_spi.c	168;"	v	line:168
+SPI_CMD_RW::0b11110000	X:\Z80\z80memio\aux_spi\aux_spi.c	152;"	d	line:152	file:
+S_OFF::HIGH	X:\Z80\z80memio\aux_spi\aux_spi.c	95;"	d	line:95	file:
+S_ON::LOW	X:\Z80\z80memio\aux_spi\aux_spi.c	94;"	d	line:94	file:
+TIMERCHARGE_BASE_1::64000	X:\Z80\z80memio\aux_spi\aux_spi.c	138;"	d	line:138	file:
+TIMERCHARGE_BASE_2::61543	X:\Z80\z80memio\aux_spi\aux_spi.c	139;"	d	line:139	file:
+TIMERCHARGE_BASE_3::65000	X:\Z80\z80memio\aux_spi\aux_spi.c	140;"	d	line:140	file:
+TIMERCHARGE_BASE_4::62543	X:\Z80\z80memio\aux_spi\aux_spi.c	141;"	d	line:141	file:
+TIMERCHARGE_BASE_X10::65523	X:\Z80\z80memio\aux_spi\aux_spi.c	137;"	d	line:137	file:
+TIMERDISCHARGE::41000	X:\Z80\z80memio\aux_spi\aux_spi.c	142;"	d	line:142	file:
+TIME_CHARGE	X:\Z80\z80memio\aux_spi\aux_spi.c	176;"	v	line:176
+TRIP::32	X:\Z80\z80memio\aux_spi\aux_spi.c	144;"	d	line:144	file:
+UNPRESSED::0	X:\Z80\z80memio\aux_spi\aux_spi.c	149;"	d	line:149	file:
+YES::HIGH	X:\Z80\z80memio\aux_spi\aux_spi.c	101;"	d	line:101	file:
+accum	X:\Z80\z80memio\aux_spi\aux_spi.c	470;"	l	line:470
+bit_count	X:\Z80\z80memio\aux_spi\aux_spi.c	454;"	f	line:454	signature:(unsigned char input)
+btype	X:\Z80\z80memio\aux_spi\aux_spi.c	170;"	s	line:170	file:
+channel	X:\Z80\z80memio\aux_spi\aux_spi.c	251;"	l	line:251	file:
+charge_time	X:\Z80\z80memio\aux_spi\aux_spi.c	177;"	v	line:177
+config	X:\Z80\z80memio\aux_spi\aux_spi.c	164;"	m	line:164	struct:spi_link_io_type	file:
+counter	X:\Z80\z80memio\aux_spi\aux_spi.c	456;"	l	line:456
+crc_table	X:\Z80\z80memio\aux_spi\aux_spi.c	184;"	v	line:184
+ctmu_button	X:\Z80\z80memio\aux_spi\aux_spi.c	175;"	v	line:175
+ctmu_change	X:\Z80\z80memio\aux_spi\aux_spi.c	427;"	l	line:427	file:
+ctmu_setup	X:\Z80\z80memio\aux_spi\aux_spi.c	135;"	p	line:135	file:	signature:(unsigned char, unsigned char)
+ctmu_setup	X:\Z80\z80memio\aux_spi\aux_spi.c	361;"	f	line:361	signature:(unsigned char current, unsigned char channel)
+ctmu_touch	X:\Z80\z80memio\aux_spi\aux_spi.c	134;"	p	line:134	file:	signature:(unsigned char, unsigned char)
+ctmu_touch	X:\Z80\z80memio\aux_spi\aux_spi.c	425;"	f	line:425	signature:(unsigned char channel, unsigned char NULL0)
+data_in2	X:\Z80\z80memio\aux_spi\aux_spi.c	251;"	l	line:251	file:
+e	X:\Z80\z80memio\aux_spi\aux_spi.c	487;"	l	line:487
+eeprom_key	X:\Z80\z80memio\aux_spi\aux_spi.c	171;"	m	line:171	struct:btype	file:
+eeprom_mask	X:\Z80\z80memio\aux_spi\aux_spi.c	171;"	m	line:171	struct:btype	file:
+eeprom_save	X:\Z80\z80memio\aux_spi\aux_spi.c	171;"	m	line:171	struct:btype	file:
+entr_d	X:\Z80\z80memio\aux_spi\aux_spi.c	489;"	l	line:489
+entr_r	X:\Z80\z80memio\aux_spi\aux_spi.c	489;"	l	line:489
+entr_s	X:\Z80\z80memio\aux_spi\aux_spi.c	489;"	l	line:489
+frame	X:\Z80\z80memio\aux_spi\aux_spi.c	163;"	m	line:163	struct:spi_link_io_type	file:
+high_handler	X:\Z80\z80memio\aux_spi\aux_spi.c	121;"	p	line:121	file:	signature:(void)
+high_handler	X:\Z80\z80memio\aux_spi\aux_spi.c	248;"	f	line:248	signature:(void)
+high_int	X:\Z80\z80memio\aux_spi\aux_spi.c	222;"	f	line:222	signature:(void)
+i	X:\Z80\z80memio\aux_spi\aux_spi.c	251;"	l	line:251	file:
+i	X:\Z80\z80memio\aux_spi\aux_spi.c	338;"	l	line:338
+i	X:\Z80\z80memio\aux_spi\aux_spi.c	456;"	l	line:456
+int16_t	X:\Z80\z80memio\aux_spi\aux_spi.c	116;"	t	line:116	file:
+int32_t	X:\Z80\z80memio\aux_spi\aux_spi.c	117;"	t	line:117	file:
+int64_t	X:\Z80\z80memio\aux_spi\aux_spi.c	118;"	t	line:118	file:
+int8_t	X:\Z80\z80memio\aux_spi\aux_spi.c	115;"	t	line:115	file:
+int_count	X:\Z80\z80memio\aux_spi\aux_spi.c	165;"	m	line:165	struct:spi_link_io_type	file:
+last	X:\Z80\z80memio\aux_spi\aux_spi.c	427;"	l	line:427	file:
+len	X:\Z80\z80memio\aux_spi\aux_spi.c	470;"	l	line:470
+link	X:\Z80\z80memio\aux_spi\aux_spi.c	162;"	m	line:162	struct:spi_link_io_type	file:
+low_handler	X:\Z80\z80memio\aux_spi\aux_spi.c	122;"	p	line:122	file:	signature:(void)
+low_handler	X:\Z80\z80memio\aux_spi\aux_spi.c	238;"	f	line:238	signature:(void)
+low_int	X:\Z80\z80memio\aux_spi\aux_spi.c	230;"	f	line:230	signature:(void)
+main	X:\Z80\z80memio\aux_spi\aux_spi.c	540;"	f	line:540	signature:(void)
+null	X:\Z80\z80memio\aux_spi\aux_spi.c	427;"	l	line:427	file:
+puf_bits	X:\Z80\z80memio\aux_spi\aux_spi.c	173;"	v	line:173
+puf_sram	X:\Z80\z80memio\aux_spi\aux_spi.c	485;"	f	line:485	signature:(unsigned char cmode, unsigned char kmode)
+puf_sram	X:\Z80\z80memio\aux_spi\aux_spi.c	586;"	p	line:586	file:
+seed	X:\Z80\z80memio\aux_spi\aux_spi.c	171;"	m	line:171	struct:btype	file:
+seeda	X:\Z80\z80memio\aux_spi\aux_spi.c	488;"	l	line:488	file:
+seedp	X:\Z80\z80memio\aux_spi\aux_spi.c	489;"	l	line:489
+seq	X:\Z80\z80memio\aux_spi\aux_spi.c	164;"	m	line:164	struct:spi_link_io_type	file:
+spi_link_io_type	X:\Z80\z80memio\aux_spi\aux_spi.c	161;"	s	line:161	file:
+sram_key	X:\Z80\z80memio\aux_spi\aux_spi.c	156;"	v	line:156
+sram_key_masked	X:\Z80\z80memio\aux_spi\aux_spi.c	156;"	v	line:156
+sram_raw	X:\Z80\z80memio\aux_spi\aux_spi.c	171;"	m	line:171	struct:btype	file:
+switchState	X:\Z80\z80memio\aux_spi\aux_spi.c	177;"	v	line:177
+t_avg	X:\Z80\z80memio\aux_spi\aux_spi.c	338;"	l	line:338
+timeout	X:\Z80\z80memio\aux_spi\aux_spi.c	164;"	m	line:164	struct:spi_link_io_type	file:
+timer	X:\Z80\z80memio\aux_spi\aux_spi.c	250;"	l	line:250	file:
+timer	X:\Z80\z80memio\aux_spi\aux_spi.c	428;"	l	line:428	file:
+touch_base	X:\Z80\z80memio\aux_spi\aux_spi.c	177;"	v	line:177
+touch_base_calc	X:\Z80\z80memio\aux_spi\aux_spi.c	132;"	p	line:132	file:	signature:(unsigned char)
+touch_base_calc	X:\Z80\z80memio\aux_spi\aux_spi.c	336;"	f	line:336	signature:(unsigned char channel)
+touch_channel	X:\Z80\z80memio\aux_spi\aux_spi.c	133;"	p	line:133	file:	signature:(unsigned char)
+touch_channel	X:\Z80\z80memio\aux_spi\aux_spi.c	351;"	f	line:351	signature:(unsigned char channel)
+touch_peak	X:\Z80\z80memio\aux_spi\aux_spi.c	252;"	l	line:252	file:
+touch_tmp	X:\Z80\z80memio\aux_spi\aux_spi.c	542;"	l	line:542
+touch_zero	X:\Z80\z80memio\aux_spi\aux_spi.c	542;"	l	line:542
+uint16_t	X:\Z80\z80memio\aux_spi\aux_spi.c	111;"	t	line:111	file:
+uint32_t	X:\Z80\z80memio\aux_spi\aux_spi.c	112;"	t	line:112	file:
+uint64_t	X:\Z80\z80memio\aux_spi\aux_spi.c	113;"	t	line:113	file:
+uint8_t	X:\Z80\z80memio\aux_spi\aux_spi.c	110;"	t	line:110	file:
+vspeed	X:\Z80\z80memio\aux_spi\aux_spi.c	175;"	v	line:175

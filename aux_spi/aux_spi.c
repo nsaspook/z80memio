@@ -102,6 +102,9 @@
 #define IN		HIGH
 #define OUT		LOW
 
+#define DLED2		LATCbits.LATC2
+#define DLED7		LATCbits.LATC7
+
 #ifdef INTTYPES
 #include <stdint.h>
 #else
@@ -163,6 +166,7 @@ struct spi_link_io_type { // internal SPI link state table
 	uint8_t frame : 1;
 	uint8_t timeout, seq, config;
 	int32_t int_count;
+	uint8_t data[4];
 };
 
 volatile struct spi_link_io_type S;
@@ -251,6 +255,8 @@ void high_handler(void)
 	static unsigned char channel, i = 0, data_in2 = 0;
 	static unsigned int touch_peak = 1024; // max CTMU voltage
 
+	DLED7 = !DLED7;
+
 	if (INTCONbits.TMR0IF) { // check timer0 irq 
 		if (!CTMUCONHbits.IDISSEN) { // charge cycle timer0 int, because not shorting the CTMU voltage.
 			CTMUCONLbits.EDG1STAT = 0; // Stop charging touch circuit
@@ -298,11 +304,11 @@ void high_handler(void)
 	}
 
 	if (PIR1bits.SSPIF) { // SPI port SLAVE receiver
+		DLED2 = !DLED2;
 		S.link = TRUE;
 		S.timeout = 3;
 		PIR1bits.SSPIF = LOW;
 		data_in2 = SSPBUF; // read the buffer quickly
-		LATBbits.LATB2 = !LATBbits.LATB2;
 
 		/*
 		 * We are processing the Master CMD request
@@ -310,12 +316,13 @@ void high_handler(void)
 		if (S.frame) {
 			switch (S.seq) {
 			case 0:
-
+				SSPBUF = S.data[1];
 				break;
 			case 1:
-
+				SSPBUF = S.data[2];
+				break;
 			default:
-
+				SSPBUF = S.data[3];
 				S.frame = FALSE;
 				break;
 			}
@@ -325,10 +332,11 @@ void high_handler(void)
 		/*
 		 * The master has sent a data RW command
 		 */
-		if (data_in2 == SPI_CMD_RW && !S.frame) {
+		if (!S.frame) {
 			S.frame = TRUE; // set the inprogress flag
 			S.seq = 0;
-			SSPBUF = 0; // load the buffer for the next master byte
+			S.data[0] = PORTB;
+			SSPBUF = S.data[0]; // load the buffer for the next master byte
 		}
 	}
 }
@@ -576,6 +584,7 @@ void main(void)
 	OpenSPI(SLV_SSON, MODE_00, SMPMID); // Must be SMPMID in slave mode
 	/* clear SPI module possible flag */
 	PIR1bits.SSPIF = LOW;
+	PIE1bits.SSPIE = HIGH;
 
 	/* Enable interrupt priority */
 	RCONbits.IPEN = 1;
