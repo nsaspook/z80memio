@@ -246,11 +246,12 @@ void low_handler(void)
 	}
 }
 
-#pragma interrupt high_handler
+#pragma	tmpdata	ISRHtmpdata
+#pragma interrupt high_handler nosave=section (".tmpdata")
 
 void high_handler(void)
 {
-	static union Timers timer;
+	static union Timers timer, timer0;
 	static unsigned char channel, i = 0, data_in2 = 0;
 	static unsigned int touch_peak = 1024; // max CTMU voltage
 
@@ -268,7 +269,9 @@ void high_handler(void)
 			CTMUCONHbits.IDISSEN = 0; // end drain of touch circuit
 			TIME_CHARGE = TRUE; // set charging flag
 			CTMU_WORKING = TRUE; // set working flag, doing 
-			WriteTimer0(charge_time[channel]); // set timer to charge rate time
+			timer0.lt = charge_time[channel]; // set timer to charge rate time
+			TMR0H = timer0.bt[HIGH]; // Write high byte to Timer0
+			TMR0L = timer0.bt[LOW]; // Write low byte to Timer0
 			CTMUCONLbits.EDG1STAT = 1; // Begin charging the touch circuit
 		}
 		// clr  TMR0 int flag
@@ -297,46 +300,22 @@ void high_handler(void)
 		CTMUCONLbits.EDG1STAT = 0; // Set Edge status bits to zero
 		CTMUCONLbits.EDG2STAT = 0;
 		CTMUCONHbits.IDISSEN = 1; // drain charge on the circuit
-		WriteTimer0(TIMERDISCHARGE); // set timer to discharge rate
+		timer0.lt = TIMERDISCHARGE; // set timer to discharge rate
+		TMR0H = timer0.bt[HIGH]; // Write high byte to Timer0
+		TMR0L = timer0.bt[LOW]; // Write low byte to Timer0
 	}
 
 	if (PIR1bits.SSPIF) { // SPI port SLAVE receiver
-		DLED7 = !DLED7;
-		S.link = TRUE;
-		S.timeout = 3;
+		DLED7 = HIGH;
 		PIR1bits.SSPIF = LOW;
 		data_in2 = SSPBUF; // read the buffer quickly
-
-		/*
-		 * We are processing the Master CMD request
-		 */
-		if (S.frame) {
-			switch (S.seq) {
-			case 0:
-				SSPBUF = S.data[0];
-				break;
-			case 1:
-				SSPBUF = S.data[0];
-				break;
-			default:
-				SSPBUF = S.data[0];
-				S.frame = FALSE;
-				break;
-			}
-			S.seq++;
-		}
-
-		/*
-		 * The master has sent a data RW command
-		 */
-		if (!S.frame) {
-			S.frame = TRUE; // set the inprogress flag
-			S.seq = 0;
-			S.data[0] = PORTB;
-			SSPBUF = S.data[0]; // load the buffer for the next master byte
-		}
+		//		S.data[0] = PORTB;
+		S.data[0] = 0b01110001;
+		SSPBUF = PORTB; // load the buffer for the next master byte
+		DLED7 = LOW;
 	}
 }
+#pragma	tmpdata
 
 unsigned int touch_base_calc(unsigned char channel)
 {
@@ -444,12 +423,10 @@ unsigned int ctmu_touch(unsigned char channel, unsigned char NULL0)
 				if (ctmu_change > 255) ctmu_change = 1;
 			}
 		}
-		LATC = ~ctmu_change;
 		if ((null == 0) && NULL0) null = ctmu_change;
 		last = ctmu_change;
 		return(unsigned int) ctmu_change;
 	} else {
-		LATC = ~last;
 		return(unsigned int) last;
 	}
 }
@@ -580,30 +557,34 @@ void main(void)
 	/* setup the SPI interface */
 	OpenSPI(SLV_SSON, MODE_00, SMPMID); // Must be SMPMID in slave mode
 	/* clear SPI module possible flag */
+	SSPBUF = 0xff;
 	PIR1bits.SSPIF = LOW;
 	PIE1bits.SSPIE = HIGH;
 
 	/* Enable interrupt priority */
 	RCONbits.IPEN = 1;
 	/* Enable all high priority interrupts */
-	INTCONbits.GIEH = 1;
+	INTCONbits.GIEH = HIGH;
 
 
 	srand(puf_sram(FALSE, FALSE)); // use unmasked seed for prng
 
 	/* Enable all low priority interrupts */
-	INTCONbits.GIEL = 1;
+	INTCONbits.GIEL = LOW;
 
 	//		CTMU setups
 	ctmu_button = 0; // select start touch input
-	ctmu_setup(11, ctmu_button); // config the CTMU for touch response 1X for normal .55ua, 2 for higher 5.5ua charge current
-	touch_zero = touch_base_calc(ctmu_button);
+//	ctmu_setup(11, ctmu_button); // config the CTMU for touch response 1X for normal .55ua, 2 for higher 5.5ua charge current
+//	touch_zero = touch_base_calc(ctmu_button);
 
 	/* Loop forever */
-	while (TRUE) { // cycle colors at random speeds
-		CTMU_ADC_UPDATED = FALSE;
-		while (!CTMU_ADC_UPDATED) ClrWdt(); // wait for touch update cycle
-		touch_tmp = ctmu_touch(ctmu_button, TRUE);
+	while (TRUE) {
+		if (SSPCON1bits.WCOL || SSPCON1bits.SSPOV) { // check for overruns/collisions
+			SSPCON1bits.WCOL = SSPCON1bits.SSPOV = 0;
+		}
+//		CTMU_ADC_UPDATED = FALSE;
+//		while (!CTMU_ADC_UPDATED) ClrWdt(); // wait for touch update cycle
+//		touch_tmp = ctmu_touch(ctmu_button, TRUE);
 	}
 }
 #pragma idata
