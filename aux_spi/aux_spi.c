@@ -255,7 +255,11 @@ void high_handler(void)
 	static unsigned char channel, i = 0, data_in2 = 0;
 	static unsigned int touch_peak = 1024; // max CTMU voltage
 
+	_asm nop _endasm // asm code to disable compiler optimizations
+	DLED7 = LOW;
+
 	if (INTCONbits.TMR0IF) { // check timer0 irq 
+		DLED7 = HIGH;
 		if (!CTMUCONHbits.IDISSEN) { // charge cycle timer0 int, because not shorting the CTMU voltage.
 			CTMUCONLbits.EDG1STAT = 0; // Stop charging touch circuit
 			TIME_CHARGE = FALSE; // clear charging flag
@@ -276,8 +280,11 @@ void high_handler(void)
 		}
 		// clr  TMR0 int flag
 		INTCONbits.TMR0IF = 0; //clear interrupt flag
+		DLED7 = LOW;
 	}
+
 	if (PIR1bits.ADIF) { // check ADC irq
+		DLED7 = HIGH;
 		PIR1bits.ADIF = 0; // clear ADC int flag
 		if (ADRES < touch_peak) touch_peak = ADRES; // find peak value
 		if (i++ >= PEAK_READS) {
@@ -303,17 +310,23 @@ void high_handler(void)
 		timer0.lt = TIMERDISCHARGE; // set timer to discharge rate
 		TMR0H = timer0.bt[HIGH]; // Write high byte to Timer0
 		TMR0L = timer0.bt[LOW]; // Write low byte to Timer0
+		DLED7 = LOW;
 	}
 
 	if (PIR1bits.SSPIF) { // SPI port SLAVE receiver
+		DLED7 = LOW;
+		DLED7 = HIGH;
+		DLED7 = LOW;
 		DLED7 = HIGH;
 		PIR1bits.SSPIF = LOW;
-		data_in2 = SSPBUF; // read the buffer quickly
-		//		S.data[0] = PORTB;
-		S.data[0] = 0b01110001;
-		SSPBUF = PORTB; // load the buffer for the next master byte
+		data_in2 = SSP1BUF; // read the buffer quickly for IO address from READ_IO_SPI in MEMIO
+		SSP1BUF = PORTB; // load the buffer for the next master byte (seen in the first SPI high speed burst)
 		DLED7 = LOW;
 	}
+
+	DLED7 = LOW;
+	DLED7 = HIGH;
+	DLED7 = LOW;
 }
 #pragma	tmpdata
 
@@ -524,7 +537,7 @@ void main(void)
 	unsigned int touch_zero, touch_tmp;
 
 	TRISA = 0xff; // inputs default analog
-	ANSELAbits.ANSA5 = 0; // digital input
+	ANSELAbits.ANSA5 = 0; // digital
 	TRISB = 0xff; // outputs default digital per config pragma
 	WPUB = 0xff;
 	INTCON2bits.RBPU = LOW; // turn on weak pullups
@@ -554,12 +567,12 @@ void main(void)
 	TRISCbits.TRISC5 = OUT; // SDO
 
 
-	/* setup the SPI interface */
-	OpenSPI(SLV_SSON, MODE_00, SMPMID); // Must be SMPMID in slave mode
+	/* setup the SPI interface, slave select is off so we can capture the first SPI IO burst */
+	OpenSPI1(SLV_SSOFF, MODE_00, SMPMID); // Must be SMPMID in slave mode
 	/* clear SPI module possible flag */
-	SSPBUF = 0xff;
-	PIR1bits.SSPIF = LOW;
-	PIE1bits.SSPIE = HIGH;
+	SSP1BUF = 0xff;
+	PIR1bits.SSP1IF = LOW;
+	PIE1bits.SSP1IE = HIGH;
 
 	/* Enable interrupt priority */
 	RCONbits.IPEN = 1;
@@ -574,17 +587,17 @@ void main(void)
 
 	//		CTMU setups
 	ctmu_button = 0; // select start touch input
-//	ctmu_setup(11, ctmu_button); // config the CTMU for touch response 1X for normal .55ua, 2 for higher 5.5ua charge current
-//	touch_zero = touch_base_calc(ctmu_button);
+	ctmu_setup(11, ctmu_button); // config the CTMU for touch response 1X for normal .55ua, 2 for higher 5.5ua charge current
+	touch_zero = touch_base_calc(ctmu_button);
 
 	/* Loop forever */
 	while (TRUE) {
 		if (SSPCON1bits.WCOL || SSPCON1bits.SSPOV) { // check for overruns/collisions
 			SSPCON1bits.WCOL = SSPCON1bits.SSPOV = 0;
 		}
-//		CTMU_ADC_UPDATED = FALSE;
-//		while (!CTMU_ADC_UPDATED) ClrWdt(); // wait for touch update cycle
-//		touch_tmp = ctmu_touch(ctmu_button, TRUE);
+		CTMU_ADC_UPDATED = FALSE;
+		while (!CTMU_ADC_UPDATED) ClrWdt(); // wait for touch update cycle
+		touch_tmp = ctmu_touch(ctmu_button, TRUE);
 	}
 }
 #pragma idata
