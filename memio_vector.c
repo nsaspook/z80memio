@@ -10,7 +10,7 @@
 
 void InterruptHandlerHigh(void)
 {
-	static uint8_t b_dummy;
+	static uint8_t b_dummy, b_data;
 	static union Timers timer;
 
 	/* Z80 Control routines */
@@ -95,7 +95,7 @@ void InterruptHandlerHigh(void)
 					EDCS = HIGH;
 					SSP1BUF = Z.paddr;
 					while (!SSP1STATbits.BF);
-					b_dummy = SSP1BUF;
+					b_data = SSP1BUF;
 					SSP1BUF = z80_rom[Z.paddr];
 					while (!SSP1STATbits.BF);
 					b_dummy = SSP1BUF;
@@ -110,34 +110,38 @@ void InterruptHandlerHigh(void)
 					EDCS = HIGH;
 					SSP1BUF = Z.maddr;
 					while (!SSP1STATbits.BF);
-					b_dummy = SSP1BUF;
+					b_data = SSP1BUF;
 				}
 				/*
 				 * Z80 IO port address space
 				 */
 
-				switch (Z.maddr) {
-				case PORT_BIT:
-					SPARE1 = ZDATA_I;
-					break;
-				case SPI_DATA:
-					SSPCON1bits.SSPM = SPI_FOSC_16; // set clock to slower speed
-					EDRS = HIGH;
-					EDCS = LOW;
-					SSP1BUF = ZDATA_I;
-					while (!SSP1STATbits.BF);
-					b_dummy = SSP1BUF;
-					break;
-				case SPI_CMD:
-					SSPCON1bits.SSPM = SPI_FOSC_16; // set clock to slower speed
-					EDRS = LOW;
-					EDCS = LOW;
-					SSP1BUF = ZDATA_I;
-					while (!SSP1STATbits.BF);
-					b_dummy = SSP1BUF;
-					break;
-				default:
-					break;
+				if (Z.WR) {
+					switch (Z.maddr) {
+					case PORT_BIT:
+						SPARE1 = ZDATA_I;
+						break;
+					case SPI_DATA:
+						SSPCON1bits.SSPM = SPI_FOSC_16; // set clock to slower speed
+						EDRS = HIGH;
+						EDCS = LOW;
+						SSP1BUF = ZDATA_I;
+						while (!SSP1STATbits.BF);
+						b_dummy = SSP1BUF;
+						break;
+					case SPI_CMD:
+						SSPCON1bits.SSPM = SPI_FOSC_16; // set clock to slower speed
+						EDRS = LOW;
+						EDCS = LOW;
+						SSP1BUF = ZDATA_I;
+						while (!SSP1STATbits.BF);
+						b_dummy = SSP1BUF;
+						break;
+					default:
+						break;
+					}
+				} else {
+					ZDATA_O = b_data;
 				}
 			}
 		}
