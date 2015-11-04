@@ -19,7 +19,7 @@ extern "C" {
 #include "ringbufs.h"
 	
 #define DEBUG_MEM	FALSE
-#define DEBUG_IO	TRUE
+#define READ_IO_SPI	TRUE			// This should be TRUE in normal operation
 //#define SLOW_STEP
 
 #define	TIMEROFFSET	32000			// timer0 16bit counter value for ~1 second to overflow
