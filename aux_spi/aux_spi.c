@@ -104,6 +104,7 @@
 
 #define DLED2		LATCbits.LATC2
 #define DLED7		LATCbits.LATC7
+#define LCDCMD		PORTAbits.AN4
 
 #ifdef INTTYPES
 #include <stdint.h>
@@ -180,7 +181,6 @@ unsigned char vspeed = RNG_SPEED_F, MAXA = 255, MAXR = 255, MAXG = 255, MAXB = 2
 volatile unsigned char CTMU_ADC_UPDATED = FALSE, TIME_CHARGE = FALSE, CTMU_WORKING = FALSE;
 volatile unsigned int touch_base[16], switchState = UNPRESSED, charge_time[16]; //storage for reading parameters
 
-
 /******************************************************************************
  *  Make CRC 16 Look-up Table.                                            *
  ******************************************************************************/
@@ -220,7 +220,6 @@ const rom unsigned int far crc_table[0x100] = {
 	0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
 };
 
-
 #pragma code high_interrupt = 0x8
 
 void high_int(void)
@@ -254,8 +253,6 @@ void high_handler(void)
 	static union Timers timer;
 	static unsigned char channel, i = 0, data_in2 = 0;
 	static unsigned int touch_peak = 1024; // max CTMU voltage
-
-	DLED7 = !DLED7;
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 
 		if (!CTMUCONHbits.IDISSEN) { // charge cycle timer0 int, because not shorting the CTMU voltage.
@@ -304,7 +301,7 @@ void high_handler(void)
 	}
 
 	if (PIR1bits.SSPIF) { // SPI port SLAVE receiver
-		DLED2 = !DLED2;
+		DLED7 = !DLED7;
 		S.link = TRUE;
 		S.timeout = 3;
 		PIR1bits.SSPIF = LOW;
@@ -316,13 +313,13 @@ void high_handler(void)
 		if (S.frame) {
 			switch (S.seq) {
 			case 0:
-				SSPBUF = S.data[1];
+				SSPBUF = S.data[0];
 				break;
 			case 1:
-				SSPBUF = S.data[2];
+				SSPBUF = S.data[0];
 				break;
 			default:
-				SSPBUF = S.data[3];
+				SSPBUF = S.data[0];
 				S.frame = FALSE;
 				break;
 			}
