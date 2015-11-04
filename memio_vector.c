@@ -102,7 +102,7 @@ void InterruptHandlerHigh(void)
 				}
 			}
 			if (Z.IORQ) {
-				if (DEBUG_IO) {
+				if (READ_IO_SPI) {
 					/*
 					 * send the port and data via SPI for debug
 					 */
