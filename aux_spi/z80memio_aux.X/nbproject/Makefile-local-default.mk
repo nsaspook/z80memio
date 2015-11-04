@@ -18,7 +18,7 @@ PATH_TO_IDE_BIN=/opt/microchip/mplabx/v3.10/mplab_ide/mplab_ide/modules/../../bi
 # Adding MPLAB X bin directory to path.
 PATH:=/opt/microchip/mplabx/v3.10/mplab_ide/mplab_ide/modules/../../bin/:$(PATH)
 # Path to java used to run MPLAB X when this makefile was created
-MP_JAVA_PATH="/opt/microchip/mplabx/v3.10/sys/java/jre1.7.0_79/bin/"
+MP_JAVA_PATH="/usr/lib/jvm/java-8-openjdk-i386/jre/bin/"
 OS_CURRENT="$(shell uname -s)"
 MP_CC="/opt/microchip/mplabc18/v3.40/bin/mcc18"
 # MP_CPPC is not defined
