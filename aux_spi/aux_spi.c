@@ -314,8 +314,10 @@ void high_handler(void)
 		PIR1bits.SSPIF = LOW;
 		data_in2 = SSP1BUF; // read the buffer quickly for IO address from READ_IO_SPI in MEMIO
 		data_in2 = (PORTB & 0b00111111) | 0b11000000;
-		if (switchState == PRESSED)
-			data_in2 &= 0b10111111;
+		if (switchState == PRESSED) {
+			if (channel == 0) data_in2 &= 0b10111111;
+			if (channel == 1) data_in2 &= 0b01111111;
+		}
 		SSP1BUF = data_in2; // load the buffer for the next master byte (seen in the first SPI high speed burst)
 	}
 
