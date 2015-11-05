@@ -252,7 +252,7 @@ void low_handler(void)
 void high_handler(void)
 {
 	static union Timers timer, timer0;
-	static unsigned char channel, i = 0, data_in2 = 0, data;
+	static unsigned char channel, i = 0, data_in2 = 0;
 	static unsigned int touch_peak = 1024; // max CTMU voltage
 
 	_asm nop _endasm // asm code to disable compiler optimizations
@@ -309,13 +309,12 @@ void high_handler(void)
 	}
 
 	if (PIR1bits.SSPIF) { // SPI port SLAVE receiver
-		DLED7 = HIGH;
 		PIR1bits.SSPIF = LOW;
 		data_in2 = SSP1BUF; // read the buffer quickly for IO address from READ_IO_SPI in MEMIO
-		data = PORTB & 0b00111111;
+		data_in2 = (PORTB & 0b00111111) | 0b11000000;
 		if (switchState == PRESSED)
-			data |= 0b01000000;
-		SSP1BUF = data; // load the buffer for the next master byte (seen in the first SPI high speed burst)
+			data_in2 &= 0b10111111;
+		SSP1BUF = data_in2; // load the buffer for the next master byte (seen in the first SPI high speed burst)
 	}
 
 }
