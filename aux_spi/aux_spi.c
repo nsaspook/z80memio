@@ -252,14 +252,12 @@ void low_handler(void)
 void high_handler(void)
 {
 	static union Timers timer, timer0;
-	static unsigned char channel, i = 0, data_in2 = 0;
+	static unsigned char channel, i = 0, data_in2 = 0, data;
 	static unsigned int touch_peak = 1024; // max CTMU voltage
 
 	_asm nop _endasm // asm code to disable compiler optimizations
-	DLED7 = LOW;
 
 	if (INTCONbits.TMR0IF) { // check timer0 irq 
-		DLED7 = HIGH;
 		if (!CTMUCONHbits.IDISSEN) { // charge cycle timer0 int, because not shorting the CTMU voltage.
 			CTMUCONLbits.EDG1STAT = 0; // Stop charging touch circuit
 			TIME_CHARGE = FALSE; // clear charging flag
@@ -280,14 +278,9 @@ void high_handler(void)
 		}
 		// clr  TMR0 int flag
 		INTCONbits.TMR0IF = 0; //clear interrupt flag
-		DLED7 = LOW;
 	}
 
 	if (PIR1bits.ADIF) { // check ADC irq
-		DLED7 = LOW;
-		DLED7 = HIGH;
-		DLED7 = LOW;
-		DLED7 = HIGH;
 		PIR1bits.ADIF = 0; // clear ADC int flag
 		if (ADRES < touch_peak) touch_peak = ADRES; // find peak value
 		if (i++ >= PEAK_READS) {
@@ -313,25 +306,18 @@ void high_handler(void)
 		timer0.lt = TIMERDISCHARGE; // set timer to discharge rate
 		TMR0H = timer0.bt[HIGH]; // Write high byte to Timer0
 		TMR0L = timer0.bt[LOW]; // Write low byte to Timer0
-		DLED7 = LOW;
 	}
 
 	if (PIR1bits.SSPIF) { // SPI port SLAVE receiver
 		DLED7 = HIGH;
 		PIR1bits.SSPIF = LOW;
 		data_in2 = SSP1BUF; // read the buffer quickly for IO address from READ_IO_SPI in MEMIO
-		if (switchState==PRESSED) {
-			SSP1BUF=4;
-		} else {
-			SSP1BUF=255;
-		}
-//		SSP1BUF = PORTB; // load the buffer for the next master byte (seen in the first SPI high speed burst)
-		DLED7 = LOW;
+		data = PORTB & 0b00111111;
+		if (switchState == PRESSED)
+			data |= 0b01000000;
+		SSP1BUF = data; // load the buffer for the next master byte (seen in the first SPI high speed burst)
 	}
 
-	DLED7 = LOW;
-	DLED7 = HIGH;
-	DLED7 = LOW;
 }
 #pragma	tmpdata
 
