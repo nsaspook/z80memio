@@ -176,7 +176,6 @@ void InterruptHandlerHigh(void)
 		//		Nop();
 		//		Nop();
 		WAIT = LOW; /* keep the wait signal on to slow down the Z80 until we can process its next signal */
-		DLED2 = LOW;
 
 		/*
 		 * reset the state machine
@@ -205,7 +204,7 @@ void InterruptHandlerHigh(void)
 		PIR1bits.SSPIF = LOW;
 		data_in2 = SSP1BUF; // read the buffer quickly
 	}
-
+	DLED2 = LOW;
 }
 #pragma	tmpdata
 
