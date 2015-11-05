@@ -67,7 +67,9 @@
  *			CTMU touch driver
  *			***		background I/O using timer0/timer2 and adc interrupts
  *			Timer3 counter/buffer used for ATOMIC 16bit reads and writes of touch data
- * PORTA		AN0 touch input, AN2 DAC output
+ * SPI output byte to controller
+ * PORTA		SPI bits 6..7 AN0,AN1 touch input, AN2 DAC output from rng
+ * PORTB		SPI bits 0..5 digital inputs
  *
  *
  *
