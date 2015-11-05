@@ -17,10 +17,10 @@ extern "C" {
 #include <GenericTypeDefs.h>
 #include <timers.h>
 #include "ringbufs.h"
-	
+
 #define DEBUG_MEM	FALSE
 #define READ_IO_SPI	TRUE			// This should be TRUE in normal operation
-//#define SLOW_STEP
+	//#define SLOW_STEP
 
 #define	TIMEROFFSET	32000			// timer0 16bit counter value for ~1 second to overflow
 #define Z80_STEP	56000
@@ -57,18 +57,28 @@ extern "C" {
 	/* debug pins */
 #define DLED2		LATCbits.LATC2
 #define DLED7		LATCbits.LATC7
-	
+
 	/* display chip select pin */
 #define EDCS		LATCbits.LATC7	
 #define EDRS		LATBbits.LATB3
-	
+
 	/* spare */
 #define SPARE1		LATCbits.LATC6
-	
+
 	/* IO address */
 #define SPI_DATA	0x80
 #define SPI_CMD		0x81
 #define PORT_BIT	0x01
+#define RNGL		0x10
+#define RNGH		0x11
+
+	/*
+	 * 
+	 */
+#define RNG_UPDATE	128
+#define	RNG_SPEED_F	12
+#define	RNG_SPEED_S	10
+#define PUF_SIZE 128
 
 #ifdef INTTYPES
 #include <stdint.h>
@@ -104,22 +114,27 @@ extern "C" {
 		uint16_t maddr;
 		uint8_t data;
 	};
-	
+
 	struct spi_link_type { // internal state table
-	uint8_t SPI_LCD : 1;
-	uint8_t SPI_AUX : 1;
-	uint8_t LCD_TIMER : 1;
-	uint8_t LCD_DATA : 1;
-	uint16_t delay;
-	uint8_t config;
-	struct ringBufS_t *tx1b, *tx1a;
-	int32_t int_count;
-};
+		uint8_t SPI_LCD : 1;
+		uint8_t SPI_AUX : 1;
+		uint8_t LCD_TIMER : 1;
+		uint8_t LCD_DATA : 1;
+		uint16_t delay;
+		uint8_t config;
+		struct ringBufS_t *tx1b, *tx1a;
+		int32_t int_count;
+	};
+
+	struct btype {
+		unsigned int sheader, seed, sram_raw, eeprom_save, eeprom_mask, eeprom_key, ok, eheader;
+	};
 
 	extern volatile struct z80_type Z;
 	extern volatile uint8_t z80_ram[256];
 	extern const rom unsigned char z80_rom[256];
 	extern volatile uint8_t data_in2;
+	extern volatile struct btype puf_bits;
 
 #ifdef	__cplusplus
 }
