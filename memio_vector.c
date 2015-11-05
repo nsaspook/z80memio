@@ -141,7 +141,17 @@ void InterruptHandlerHigh(void)
 						break;
 					}
 				} else {
-					ZDATA_O = b_data;
+					switch (Z.maddr) {
+					case RNGL:
+						ZDATA_O = puf_bits.seed;
+						break;
+					case RNGH:
+						ZDATA_O = puf_bits.seed >> 8;
+						break;
+					default:
+						ZDATA_O = b_data;
+						break;
+					}
 				}
 			}
 		}
