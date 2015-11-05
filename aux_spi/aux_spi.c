@@ -138,10 +138,10 @@ void touch_channel(unsigned char);
 unsigned int ctmu_touch(unsigned char, unsigned char);
 int ctmu_setup(unsigned char, unsigned char);
 
-#define	TIMERCHARGE_BASE_X10		65523		// 5.5 uA time, large plate ~150us
-#define	TIMERCHARGE_BASE_1		64000		// .55 uA time, large plate max sens ~700us
-#define	TIMERCHARGE_BASE_2		61543		// .55 uA time, large plate low sens ~1000us
-#define	TIMERCHARGE_BASE_3		65000		// .55 uA time, small plate max sens ~200us
+#define	TIMERCHARGE_BASE_X10		65350		// 5.5 uA time, large plate ~56us
+#define	TIMERCHARGE_BASE_1		64000		// .55 uA time, large plate max sens ~400us
+#define	TIMERCHARGE_BASE_2		63000		// .55 uA time, large plate low sens ~640us
+#define	TIMERCHARGE_BASE_3		65000		// .55 uA time, small plate max sens ~150us
 #define	TIMERCHARGE_BASE_4		62543		// .55 uA time, small plate low sens ~750us
 #define	TIMERDISCHARGE			41000		// discharge and max touch data update period 1.8ms
 
@@ -284,6 +284,9 @@ void high_handler(void)
 	}
 
 	if (PIR1bits.ADIF) { // check ADC irq
+		DLED7 = LOW;
+		DLED7 = HIGH;
+		DLED7 = LOW;
 		DLED7 = HIGH;
 		PIR1bits.ADIF = 0; // clear ADC int flag
 		if (ADRES < touch_peak) touch_peak = ADRES; // find peak value
@@ -314,13 +317,15 @@ void high_handler(void)
 	}
 
 	if (PIR1bits.SSPIF) { // SPI port SLAVE receiver
-		DLED7 = LOW;
-		DLED7 = HIGH;
-		DLED7 = LOW;
 		DLED7 = HIGH;
 		PIR1bits.SSPIF = LOW;
 		data_in2 = SSP1BUF; // read the buffer quickly for IO address from READ_IO_SPI in MEMIO
-		SSP1BUF = PORTB; // load the buffer for the next master byte (seen in the first SPI high speed burst)
+		if (switchState==PRESSED) {
+			SSP1BUF=4;
+		} else {
+			SSP1BUF=255;
+		}
+//		SSP1BUF = PORTB; // load the buffer for the next master byte (seen in the first SPI high speed burst)
 		DLED7 = LOW;
 	}
 
@@ -369,6 +374,10 @@ int ctmu_setup(unsigned char current, unsigned char channel)
 	CTMUICON = 0x01; //.55uA, Nominal - No Adjustment default
 
 	switch (current) {
+	case 2:
+		CTMUICON = 0x02; //5.5uA, Nominal - No Adjustment
+		charge_time[channel] = TIMERCHARGE_BASE_X10; // faster
+		break;
 	case 11:
 		charge_time[channel] = TIMERCHARGE_BASE_1;
 		break;
@@ -385,15 +394,12 @@ int ctmu_setup(unsigned char current, unsigned char channel)
 		charge_time[channel] = TIMERCHARGE_BASE_3; // slower
 		break;
 	}
-	if (current == 0x02) {
-		CTMUICON = 0x02; //5.5uA, Nominal - No Adjustment
-		charge_time[channel] = TIMERCHARGE_BASE_X10; // faster
-	}
+
 	/**************************************************************************/
 	//Set up AD converter;
 	/**************************************************************************/
 
-	// Configure AN0-1 as an analog channels
+	// Configure AN0-1 as analog channels
 	ANSELAbits.ANSA0 = 1;
 	TRISAbits.TRISA0 = 1;
 	ANSELAbits.ANSA1 = 1;
@@ -587,7 +593,7 @@ void main(void)
 
 	//		CTMU setups
 	ctmu_button = 0; // select start touch input
-	ctmu_setup(11, ctmu_button); // config the CTMU for touch response 1X for normal .55ua, 2 for higher 5.5ua charge current
+	ctmu_setup(14, ctmu_button); // config the CTMU for touch response 1X for normal .55ua, 2 for higher 5.5ua charge current
 	touch_zero = touch_base_calc(ctmu_button);
 
 	/* Loop forever */
