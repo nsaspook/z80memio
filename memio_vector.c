@@ -14,7 +14,7 @@ void InterruptHandlerHigh(void)
 	static union Timers timer;
 
 	/* Z80 Control routines */
-
+	DLED2 = HIGH;
 	/*
 	 * MREQ from Z80
 	 */
@@ -76,7 +76,6 @@ void InterruptHandlerHigh(void)
 
 		DLED7 = !DLED7;
 		if (Z.ISRAM) { /* RAM access */
-			DLED2 = HIGH;
 			if (Z.MREQ) {
 				if (Z.WR) {
 					z80_ram[Z.maddr & 0xff] = ZDATA_I;
@@ -95,7 +94,7 @@ void InterruptHandlerHigh(void)
 					EDCS = HIGH;
 					SSP1BUF = Z.paddr;
 					while (!SSP1STATbits.BF);
-					b_data = SSP1BUF;
+					b_dummy = SSP1BUF;
 					SSP1BUF = z80_rom[Z.paddr];
 					while (!SSP1STATbits.BF);
 					b_dummy = SSP1BUF;
@@ -223,7 +222,6 @@ void work_handler(void)
 	if (PIR1bits.TMR1IF) {
 		PIR1bits.TMR1IF = LOW; // clear TMR1 interrupt flag
 		WriteTimer1(PDELAY);
-		DLED2 = !DLED2;
 	}
 }
 #pragma	tmpdata
