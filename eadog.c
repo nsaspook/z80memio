@@ -76,10 +76,10 @@ void eaDogM_WriteChr(char value)
 /*
  * STDOUT user handler function
  */
-int _user_putc(char c)
-{
-	send_lcd_data(c);
-}
+//int _user_putc(char c)
+//{
+//	send_lcd_data(c);
+//}
 
 void eaDogM_WriteCommand(uint8_t cmd)
 {
