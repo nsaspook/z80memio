@@ -147,9 +147,9 @@ int ctmu_setup(unsigned char, unsigned char);
 #define	TIMERCHARGE_BASE_4		62543		// .55 uA time, small plate low sens ~750us
 #define	TIMERDISCHARGE			41000		// discharge and max touch data update period 1.8ms
 
-#define TRIP 32  //Difference between pressed
+#define TRIP 64  //Difference between pressed
 //and un-pressed switch
-#define HYST 8 //amount to change
+#define HYST 16 //amount to change
 //from pressed to un-pressed
 #define PRESSED 1
 #define UNPRESSED 0
