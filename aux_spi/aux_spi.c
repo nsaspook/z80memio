@@ -62,9 +62,9 @@
 // CONFIG7H
 #pragma config EBTRB = OFF      // Boot Block Table Read Protection bit (Boot Block (000000-0007FFh) not protected from table reads executed in other blocks)
 
-/*
+/* V0.1
  *
- *			CTMU touch driver
+ *			CTMU touch driver, RNG  hack modified for MEMIO input
  *			***		background I/O using timer0/timer2 and adc interrupts
  *			Timer3 counter/buffer used for ATOMIC 16bit reads and writes of touch data
  * SPI output byte to controller
@@ -78,7 +78,6 @@
  *
  */
 
-#include <pwm.h>
 #include <delays.h>
 #include <stdlib.h>
 #include <EEP.h>
@@ -125,7 +124,7 @@ typedef signed long long int64_t;
 #endif
 
 void high_handler(void); //reads the CTMU voltage using a ADC channel, interrupt driven
-void low_handler(void); // led pwm isr
+void low_handler(void); // led pwm isr NOT USED
 
 #define RNG_UPDATE	128
 #define	RNG_SPEED_F	12
@@ -154,8 +153,6 @@ int ctmu_setup(unsigned char, unsigned char);
 #define PRESSED 1
 #define UNPRESSED 0
 #define	CHOP_BITS	1				// remove this many bits to reduce noise from the touch sensor
-
-#define SPI_CMD_RW		0b11110000
 
 //	Random number generator section
 #pragma udata rnddata
@@ -329,10 +326,10 @@ unsigned int touch_base_calc(unsigned char channel)
 	long t_avg = 0, i;
 	touch_channel(channel);
 	CTMU_ADC_UPDATED = FALSE;
-	while (!CTMU_ADC_UPDATED) ClrWdt(); // wait for touch update cycle
+	while (!CTMU_ADC_UPDATED); // wait for touch update cycle
 	for (i = 0; i < 8; i++) {
 		CTMU_ADC_UPDATED = FALSE;
-		while (!CTMU_ADC_UPDATED) ClrWdt(); // wait for touch update cycle
+		while (!CTMU_ADC_UPDATED); // wait for touch update cycle
 		t_avg += (ctmu_touch(channel, FALSE)&0x03ff);
 	}
 	touch_base[channel] = (unsigned int) (t_avg >> 3);
@@ -582,7 +579,7 @@ void main(void)
 
 	//		CTMU setups
 	ctmu_button = 0; // select start touch input
-	ctmu_setup(14, ctmu_button); // config the CTMU for touch response 1X for normal .55ua, 2 for higher 5.5ua charge current
+	ctmu_setup(14, ctmu_button); // config the CTMU for touch response 
 	touch_zero = touch_base_calc(ctmu_button);
 
 	/* Loop forever */
@@ -591,7 +588,7 @@ void main(void)
 			SSPCON1bits.WCOL = SSPCON1bits.SSPOV = 0;
 		}
 		CTMU_ADC_UPDATED = FALSE;
-		while (!CTMU_ADC_UPDATED) ClrWdt(); // wait for touch update cycle
+		while (!CTMU_ADC_UPDATED); // wait for touch update cycle
 		touch_tmp = ctmu_touch(ctmu_button, TRUE);
 	}
 }
