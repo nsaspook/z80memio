@@ -15,11 +15,13 @@ void InterruptHandlerHigh(void)
 
 	/* Z80 Control routines */
 	DLED2 = HIGH;
+	E.int_count++;
 	/*
 	 * MREQ from Z80
 	 */
 	if (INTCONbits.INT0IF) {
 		INTCONbits.INT0IF = LOW;
+		E.mem++;
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
 		Z.maddr = ADDR_LOW;
@@ -31,6 +33,7 @@ void InterruptHandlerHigh(void)
 		Z.paddr = ADDR_LOW;
 		if (Z.WR) { //write to pic
 			TRISD = 0xff; // output to memory or io from Z80
+			E.mem_wr++;
 		} else {
 			TRISD = 0x00; // output from memory or io to Z80
 		}
@@ -40,12 +43,14 @@ void InterruptHandlerHigh(void)
 	 */
 	if (INTCON3bits.INT1IF) {
 		INTCON3bits.INT1IF = LOW;
+		E.io++;
 		Z.IORQ = HIGH;
 		Z.RUN = TRUE;
 		Z.maddr = ADDR_LOW;
 		Z.WR = ZRD;
 		if (Z.WR) { //write to pic
 			TRISD = 0xff; // output to memory or io from Z80
+			E.io_wr++;
 		} else {
 			TRISD = 0x00; // output from memory or io to Z80
 		}
@@ -77,6 +82,7 @@ void InterruptHandlerHigh(void)
 		DLED7 = !DLED7;
 		if (Z.ISRAM) { /* RAM access */
 			if (Z.MREQ) {
+				E.RAM++;
 				if (Z.WR) {
 					z80_ram[Z.maddr & 0xff] = ZDATA_I;
 				} else {
@@ -85,6 +91,7 @@ void InterruptHandlerHigh(void)
 			}
 		} else { /* ROM access */
 			if (Z.MREQ) {
+				E.ROM++;
 				ZDATA_O = z80_rom[Z.paddr];
 				if (DEBUG_MEM && Z.M1) { /* opcode */
 					/*
@@ -198,11 +205,14 @@ void InterruptHandlerHigh(void)
 		TMR0H = timer.bt[HIGH]; // Write high byte to Timer0
 		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
 		DLED7 = !DLED7;
+		E.runtime++;
+		if (DEBUG_MEMIO & (E.runtime % 30 == 0)) E.dump = TRUE;
 	}
 
 	if (PIR1bits.SSPIF) { // SPI port receiver
 		PIR1bits.SSPIF = LOW;
 		data_in2 = SSP1BUF; // read the buffer quickly
+		E.spi_rd++;
 	}
 	DLED2 = LOW;
 }
