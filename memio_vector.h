@@ -64,14 +64,16 @@ extern "C" {
 
 	/* spare */
 #define SPARE1		LATCbits.LATC6
+#define SPARE2		LATEbits.LATE2
 
 	/* IO address */
 #define SPI_DATA	0x80
 #define SPI_CMD		0x81
-#define PORT_BIT	0x01
+#define PORT_BIT1	0x01
+#define PORT_BIT2	0x02
 #define RNGL		0x10
 #define RNGH		0x11
-	
+
 #define M_PS0		0xf0	// show Z80 stats on the LCD display
 #define M_PS1		0xf1
 #define M_PS2		0xf2
@@ -133,7 +135,7 @@ extern "C" {
 
 	struct memio_type { // internal Z80 stats
 		uint32_t int_count, mem, io, mem_wr, io_wr, ROM, RAM, spi_rd, runtime;
-		uint8_t mode,dump;
+		uint8_t mode, dump;
 	};
 
 	struct btype {
@@ -142,7 +144,7 @@ extern "C" {
 
 	extern volatile struct z80_type Z;
 	extern volatile uint8_t z80_ram[256];
-	extern const rom unsigned char z80_rom[256];
+	extern const rom unsigned char z80_rom[512];
 	extern volatile uint8_t data_in2;
 	extern volatile struct btype puf_bits;
 	extern volatile struct memio_type E;
