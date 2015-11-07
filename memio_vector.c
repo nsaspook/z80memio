@@ -25,12 +25,12 @@ void InterruptHandlerHigh(void)
 		Z.MREQ = HIGH;
 		Z.RUN = TRUE;
 		Z.maddr = ADDR_LOW;
-		// Z.maddr += ((uint16_t) (PORTE & 0x03) << 8);
+		Z.maddr += ((uint16_t) (ADDR_HIGH & 0x03) << 8);
 		Z.ISRAM = A10;
 		Z.WR = ZRD;
 		Z.M1 = !ZM1;
 		Z.RFSH = !ZRFSH;
-		Z.paddr = ADDR_LOW;
+		Z.paddr = Z.maddr;
 		if (Z.WR) { //write to pic
 			TRISD = 0xff; // output to memory or io from Z80
 			E.mem_wr++;
@@ -124,8 +124,11 @@ void InterruptHandlerHigh(void)
 
 				if (Z.WR) {
 					switch (Z.maddr) {
-					case PORT_BIT:
+					case PORT_BIT1:
 						SPARE1 = ZDATA_I;
+						break;
+					case PORT_BIT2:
+						SPARE2 = ZDATA_I;
 						break;
 					case SPI_DATA:
 						SSPCON1bits.SSPM = SPI_FOSC_16; // set clock to slower speed
@@ -157,18 +160,22 @@ void InterruptHandlerHigh(void)
 					case M_PS0:
 						E.mode = Z.maddr;
 						E.dump = TRUE;
+						ZDATA_O = b_data;
 						break;
 					case M_PS1:
 						E.mode = Z.maddr;
 						E.dump = TRUE;
+						ZDATA_O = b_data;
 						break;
 					case M_PS2:
 						E.mode = Z.maddr;
 						E.dump = TRUE;
+						ZDATA_O = b_data;
 						break;
 					case M_PS3:
 						E.mode = Z.maddr;
 						E.dump = TRUE;
+						ZDATA_O = b_data;
 						break;
 					default:
 						ZDATA_O = b_data;
