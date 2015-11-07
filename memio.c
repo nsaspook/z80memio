@@ -552,7 +552,8 @@ void memio_dump(void)
 {
 	INTCONbits.GIEH = LOW;
 	ed_cmd(1); //clear display
-	printf("memio RO%lu, RA%lu, IO%lu, RT%lu ", E.ROM, E.RAM, E.io, E.runtime);
+	if (E.mode == M_PS0) printf("PS0 RO%lu, RA%lu, IO%lu, RT%lu ", E.ROM, E.RAM, E.io, E.runtime);
+	if (E.mode == M_PS1) printf("PS1 INT%lu, IOW%lu, MEW%lu, SR%lu ", E.int_count, E.io_wr, E.mem_wr, E.spi_rd);
 	wdtdelay(4500000);
 	E.dump = FALSE;
 	INTCONbits.GIEH = HIGH;
