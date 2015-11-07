@@ -154,6 +154,22 @@ void InterruptHandlerHigh(void)
 					case RNGH:
 						ZDATA_O = puf_bits.seed >> 8;
 						break;
+					case M_PS0:
+						E.mode = Z.maddr;
+						E.dump = TRUE;
+						break;
+					case M_PS1:
+						E.mode = Z.maddr;
+						E.dump = TRUE;
+						break;
+					case M_PS2:
+						E.mode = Z.maddr;
+						E.dump = TRUE;
+						break;
+					case M_PS3:
+						E.mode = Z.maddr;
+						E.dump = TRUE;
+						break;
 					default:
 						ZDATA_O = b_data;
 						break;
@@ -206,7 +222,6 @@ void InterruptHandlerHigh(void)
 		TMR0L = timer.bt[LOW]; // Write low byte to Timer0
 		DLED7 = !DLED7;
 		E.runtime++;
-		if (DEBUG_MEMIO & (E.runtime % 30 == 0)) E.dump = TRUE;
 	}
 
 	if (PIR1bits.SSPIF) { // SPI port receiver
