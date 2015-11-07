@@ -20,8 +20,7 @@ extern "C" {
 
 #define DEBUG_MEM	FALSE
 #define READ_IO_SPI	TRUE			// This should be TRUE in normal operation
-	//#define SLOW_STEP
-#define DEBUG_MEMIO	TRUE			// show Z80 stats on the LCD display
+	//#define SLOW_STEP	
 
 #define	TIMEROFFSET	32000			// timer0 16bit counter value for ~1 second to overflow
 #define Z80_STEP	56000
@@ -72,6 +71,11 @@ extern "C" {
 #define PORT_BIT	0x01
 #define RNGL		0x10
 #define RNGH		0x11
+	
+#define M_PS0		0xf0	// show Z80 stats on the LCD display
+#define M_PS1		0xf1
+#define M_PS2		0xf2
+#define M_PS3		0xf3	
 
 	/*
 	 * 
@@ -129,7 +133,7 @@ extern "C" {
 
 	struct memio_type { // internal Z80 stats
 		uint32_t int_count, mem, io, mem_wr, io_wr, ROM, RAM, spi_rd, runtime;
-		uint8_t dump;
+		uint8_t mode,dump;
 	};
 
 	struct btype {
