@@ -1,12 +1,12 @@
 /* 
  * 1024 byte ROM and 256 byte RAM
- * currently limited to 256 bytes for testing
+ * ROM currently limited to 512 bytes for testing
  *
  * memory/io emulator for Z80, slow but works
  *
  * nsaspook    2015
  * 
- * edge connector
+ * Z80 44 edge connector
  * D0--D7 1--8, A0--A10 9--19
  * A +5, Z GND, F WAIT_, P MREQ_, K IORQ_, N RD_, M WR_, J M!_, L RFSH_
  * S BUSREQ_, C INT_, D NMI
@@ -457,6 +457,7 @@ void ed_cmd(uint8_t inst)
 
 /*
  * STDOUT user handler function
+ * to use printf with the LCD
  */
 int _user_putc(char c)
 {
