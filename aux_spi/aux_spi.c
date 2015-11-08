@@ -590,6 +590,7 @@ void main(void)
 		CTMU_ADC_UPDATED = FALSE;
 		while (!CTMU_ADC_UPDATED); // wait for touch update cycle
 		touch_tmp = ctmu_touch(ctmu_button, TRUE);
+		VREFCON2bits.DACR = rand(); //generate random analog output to DAC pin
 	}
 }
 #pragma idata
