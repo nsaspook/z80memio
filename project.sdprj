@@ -1,0 +1,9 @@
+<sdcc_project>
+    <project filename="/sdd/PIC/z80/project.sdprj" path="/sdd/PIC/z80/" />
+    <include_files />
+    <source_files>
+        <file path="/sdd/PIC/z80/XideSDCC/untitled0.c" />
+    </source_files>
+    <other_files />
+</sdcc_project>
+

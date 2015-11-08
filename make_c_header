@@ -1,0 +1,2 @@
+ makebin -s 512 untitled0.ihx >lo
+ cpct_bin2c -an z80_rom lo

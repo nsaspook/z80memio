@@ -1,0 +1,12 @@
+mcu_name=z80
+mcu_device=
+custom_flag_only=False
+custom_cflags=
+custom_ldflags=
+inc_pathes=-I/usr/share/sdcc/include
+lib_pathes=-L/usr/share/sdcc/lib
+cflag_lst=--no-std-crt0,--verbose
+ldflag_lst=,--code-loc 0,--code-size 0x0300,--xram-loc 0x0400,--xram-size 256
+cflags=-mz80  --no-std-crt0 --verbose -I/usr/share/sdcc/include
+ldflags="  --code-loc 0 --code-size 0x0300 --xram-loc 0x0400 --xram-size 256 -L/usr/share/sdcc/lib"
+breakpoints=/sdd/PIC/z80/XideSDCC/untitled0.c=[]
