@@ -34,6 +34,8 @@
       <itemPath>../1801376.pdf</itemPath>
       <itemPath>/sdd/PIC/z80/XideSDCC/untitled0.lst</itemPath>
       <itemPath>/sdd/PIC/z80/XideSDCC/untitled0.c</itemPath>
+      <itemPath>make_c_header</itemPath>
+      <itemPath>README.md</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
